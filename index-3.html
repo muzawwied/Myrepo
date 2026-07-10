@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudseep Dashboard</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        gray: {
+                            50: '#f9fafb',
+                            100: '#f3f4f6',
+                            200: '#e5e7eb',
+                            300: '#d1d5db',
+                            700: '#374151',
+                            800: '#1f2937',
+                            900: '#111827',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
+        .custom-scrollbar:hover::-webkit-scrollbar-thumb { background: #d1d5db; }
+        .rotate-180 { transform: rotate(180deg); }
+    </style>
+</head>
+<body class="bg-gray-50/30 text-gray-900 font-sans antialiased overflow-x-hidden">
+
+    <header class="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-gray-200 px-6 py-3.5 flex items-center justify-between transition-all">
+        <div class="flex items-center gap-4">
+            <button id="btn-open-sidebar" class="p-2 flex flex-col gap-1.5 focus:outline-none group cursor-pointer hover:bg-gray-100 rounded-lg transition-colors" aria-label="Buka Menu">
+                <div class="w-5 h-0.5 bg-gray-700 transition-colors group-hover:bg-black rounded-full"></div>
+                <div class="w-3.5 h-0.5 bg-gray-700 transition-colors group-hover:bg-black rounded-full"></div>
+                <div class="w-5 h-0.5 bg-gray-700 transition-colors group-hover:bg-black rounded-full"></div>
+            </button>
+            <button id="btn-back-header" onclick="switchView('view-beranda')" class="hidden p-2 text-gray-700 hover:text-black hover:bg-gray-100 rounded-lg transition-colors focus:outline-none" aria-label="Kembali">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </button>
+            <div class="font-semibold text-lg text-gray-900 hidden sm:block tracking-tight">Cloudseep</div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-4">
+            <button class="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors focus:outline-none hidden sm:block">
+                <i data-lucide="search" class="w-5 h-5"></i>
+            </button>
+
+            <button class="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors focus:outline-none" aria-label="Notifikasi">
+                <i data-lucide="bell" class="w-5 h-5"></i>
+            </button>
+
+            <div class="w-px h-6 bg-gray-200 hidden sm:block mx-1"></div>
+
+            <button onclick="switchView('view-profile')" class="flex items-center gap-2.5 p-1 pr-2 hover:bg-gray-100 rounded-full focus:outline-none transition-colors group">
+                <div class="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center overflow-hidden group-hover:ring-2 group-hover:ring-gray-200 transition-all">
+                    <img src="https://placehold.co/100x100/f3f4f6/9ca3af?text=JD" alt="John Doe" class="w-full h-full object-cover">
+                </div>
+                <div class="hidden sm:block text-left">
+                    <p class="text-sm font-medium text-gray-700 group-hover:text-gray-900 leading-none">John Doe</p>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 group-hover:text-gray-600 hidden sm:block ml-1"></i>
+            </button>
+        </div>
+    </header>
+
+    <main id="main-content" class="min-h-screen pt-8 px-6 sm:px-8 pb-8 flex flex-col justify-between transition-all duration-300">
+        
+        <div class="flex-1">
+            <div id="view-beranda" class="view-section max-w-5xl mx-auto w-full">
+                <div class="flex sm:flex-row flex-col justify-between items-start sm:items-center mb-6 gap-4">
+                    <div>
+                        <h1 class="text-2xl font-semibold text-gray-900">Project Anda</h1>
+                        <p class="text-sm text-gray-500 mt-1">Kelola semua project aplikasi dan layanan Anda.</p>
+                    </div>
+                    <button onclick="openProjectForm()" class="bg-white border border-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg shadow-sm hover:bg-gray-50 transition-all flex items-center gap-2 text-sm">
+                        <i data-lucide="plus" class="w-4 h-4 text-gray-500"></i>
+                        Project Baru
+                    </button>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-visible">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50/50 border-b border-gray-200 text-sm text-gray-500">
+                                    <th class="py-3 px-5 font-medium whitespace-nowrap">Nama Project</th>
+                                    <th class="py-3 px-5 font-medium whitespace-nowrap">Deskripsi</th>
+                                    <th class="py-3 px-5 font-medium whitespace-nowrap">Status</th>
+                                    <th class="py-3 px-5 font-medium whitespace-nowrap w-24 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm" id="project-table-body">
+                                <!-- Data project akan dirender di sini oleh JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Empty State -->
+                    <div id="project-empty-state" class="hidden py-12 text-center">
+                        <i data-lucide="folder-open" class="w-12 h-12 mx-auto text-gray-200 mb-3"></i>
+                        <p class="text-sm text-gray-500">Belum ada project yang dibuat.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-project-form" class="view-section hidden max-w-3xl mx-auto w-full">
+                <div class="mb-8 border-b border-gray-200 pb-5">
+                    <h1 id="form-project-title" class="text-2xl font-semibold text-gray-900 tracking-tight">Buat Project Baru</h1>
+                    <p class="text-sm text-gray-500 mt-1">Atur detail dan konfigurasi awal untuk project Anda.</p>
+                </div>
+
+                <form id="project-form" onsubmit="saveProject(event)">
+                    <div class="relative pl-4 sm:pl-12">
+                        <!-- Vertical Line -->
+                        <div class="absolute left-7 sm:left-[3.75rem] top-10 bottom-8 w-px bg-gray-200 hidden sm:block"></div>
+
+                        <!-- Step 1: Umum -->
+                        <div class="relative mb-12">
+                            <div class="hidden sm:flex absolute -left-12 w-8 h-8 rounded-full bg-gray-100 border border-gray-300 items-center justify-center text-sm font-medium text-gray-700 z-10">1</div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-5">Umum</h3>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-5">
+                                <div class="sm:col-span-1">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Pemilik *</label>
+                                    <div class="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed">
+                                        <div class="w-5 h-5 rounded-full border border-gray-200 bg-white flex items-center justify-center text-[10px] font-bold text-gray-400">V</div>
+                                        <span class="text-sm text-gray-900 font-medium">Cloudseep</span>
+                                        <i data-lucide="chevron-down" class="w-4 h-4 ml-auto text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label for="project-name" class="block text-sm font-medium text-gray-700 mb-1.5">Nama project *</label>
+                                    <input type="text" id="project-name" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all text-sm">
+                                    <p class="text-xs text-gray-500 mt-2">Nama project yang bagus itu singkat dan mudah diingat. Bagaimana dengan <span class="text-green-600 font-medium cursor-pointer hover:underline" onclick="document.getElementById('project-name').value='inovasi-hebat'">inovasi-hebat</span>?</p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="project-desc" class="block text-sm font-medium text-gray-700 mb-1.5">Deskripsi</label>
+                                <input type="text" id="project-desc" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all text-sm" oninput="updateCharCount(this)">
+                                <p id="desc-char-count" class="text-xs text-gray-400 mt-1.5">0 / 350 karakter</p>
+                            </div>
+                        </div>
+
+                        <div class="relative mb-12">
+                            <div class="hidden sm:flex absolute -left-12 w-8 h-8 rounded-full bg-gray-100 border border-gray-300 items-center justify-center text-sm font-medium text-gray-700 z-10">2</div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-5">Konfigurasi</h3>
+                            
+                            <div class="border border-gray-200 rounded-xl p-5 bg-white shadow-sm">
+                                <label class="block text-sm font-medium text-gray-900 mb-1">Pilih visibilitas *</label>
+                                <p class="text-xs text-gray-500 mb-4">Pilih siapa yang dapat melihat dan berkontribusi ke project ini.</p>
+                                
+                                <!-- Custom Dropdown: Visibilitas -->
+                                <div class="relative inline-block w-40">
+                                    <input type="hidden" id="project-visibility" name="visibility" value="Public">
+                                    <button type="button" onclick="toggleCustomDropdown(event, 'dropdown-visibility')" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 pl-9 pr-3 flex items-center justify-between focus:ring-2 focus:ring-gray-900 focus:border-gray-900 focus:outline-none transition-all cursor-pointer text-left">
+                                        <span id="text-visibility" class="truncate font-medium">Publik</span>
+                                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                            <i data-lucide="book" class="w-4 h-4 text-gray-500"></i>
+                                        </div>
+                                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 shrink-0"></i>
+                                    </button>
+                                    
+                                    <!-- Dropdown Menu -->
+                                    <div id="dropdown-visibility" class="custom-dropdown hidden absolute z-50 w-full mt-1.5 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden animate-fade-in-down">
+                                        <button type="button" onclick="selectDropdownOption(event, 'visibility', 'Public', 'Publik')" class="w-full text-left px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-50">Publik</button>
+                                        <button type="button" onclick="selectDropdownOption(event, 'visibility', 'Private', 'Privat')" class="w-full text-left px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Privat</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Inisialisasi -->
+                        <div class="relative mb-8">
+                            <div class="hidden sm:flex absolute -left-12 w-8 h-8 rounded-full bg-gray-100 border border-gray-300 items-center justify-center text-sm font-medium text-gray-700 z-10">3</div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-5">Inisialisasi</h3>
+                            
+                            <div class="border border-gray-100 rounded-xl bg-white shadow-sm divide-y divide-gray-100">
+                                
+                                <div class="p-5 flex justify-between items-start gap-4">
+                                    <div>
+                                        <h4 class="text-sm font-medium text-gray-900">Tambahkan README</h4>
+                                        <p class="text-xs text-gray-500 mt-1">README dapat digunakan sebagai deskripsi yang lebih panjang.</p>
+                                    </div>
+                                    <label class="inline-flex items-center cursor-pointer shrink-0 mt-1">
+                                        <input type="checkbox" class="sr-only peer">
+                                        <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gray-900"></div>
+                                    </label>
+                                </div>
+
+                                <!-- Custom Dropdown: Template -->
+                                <div class="p-5">
+                                    <h4 class="text-sm font-medium text-gray-900">Tambahkan Template</h4>
+                                    <p class="text-xs text-gray-500 mt-1 mb-3">Template membantu menyiapkan struktur awal project Anda.</p>
+                                    
+                                    <div class="relative inline-block w-48">
+                                        <input type="hidden" id="project-template" name="template" value="Tanpa template">
+                                        <button type="button" onclick="toggleCustomDropdown(event, 'dropdown-template')" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 pr-3 flex items-center justify-between focus:ring-2 focus:ring-gray-900 focus:border-gray-900 focus:outline-none transition-all cursor-pointer text-left">
+                                            <span id="text-template" class="truncate font-medium">Tanpa template</span>
+                                            <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 shrink-0"></i>
+                                        </button>
+                                        <div id="dropdown-template" class="custom-dropdown hidden absolute z-50 w-full mt-1.5 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden">
+                                            <button type="button" onclick="selectDropdownOption(event, 'template', 'Tanpa template', 'Tanpa template')" class="w-full text-left px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-50">Tanpa template</button>
+                                            <button type="button" onclick="selectDropdownOption(event, 'template', 'Node.js', 'Node.js')" class="w-full text-left px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-50">Node.js</button>
+                                            <button type="button" onclick="selectDropdownOption(event, 'template', 'React', 'React')" class="w-full text-left px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-50">React</button>
+                                            <button type="button" onclick="selectDropdownOption(event, 'template', 'Python', 'Python')" class="w-full text-left px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Python</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Custom Dropdown: Lisensi -->
+                                <div class="p-5">
+                                    <h4 class="text-sm font-medium text-gray-900">Tambahkan lisensi</h4>
+                                    <p class="text-xs text-gray-500 mt-1 mb-3">Lisensi menjelaskan bagaimana orang lain dapat menggunakan project Anda.</p>
+                                    
+                                    <div class="relative inline-block w-48">
+                                        <input type="hidden" id="project-license" name="license" value="Tanpa lisensi">
+                                        <button type="button" onclick="toggleCustomDropdown(event, 'dropdown-license')" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 pr-3 flex items-center justify-between focus:ring-2 focus:ring-gray-900 focus:border-gray-900 focus:outline-none transition-all cursor-pointer text-left">
+                                            <span id="text-license" class="truncate font-medium">Tanpa lisensi</span>
+                                            <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 shrink-0"></i>
+                                        </button>
+                                        <div id="dropdown-license" class="custom-dropdown hidden absolute z-50 w-full mt-1.5 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden">
+                                            <button type="button" onclick="selectDropdownOption(event, 'license', 'Tanpa lisensi', 'Tanpa lisensi')" class="w-full text-left px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-50">Tanpa lisensi</button>
+                                            <button type="button" onclick="selectDropdownOption(event, 'license', 'MIT License', 'MIT License')" class="w-full text-left px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-50">MIT License</button>
+                                            <button type="button" onclick="selectDropdownOption(event, 'license', 'Apache License 2.0', 'Apache License 2.0')" class="w-full text-left px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Apache License 2.0</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 flex items-center justify-end gap-3 pt-5 border-t border-gray-200">
+                        <button type="button" onclick="switchView('view-beranda')" class="bg-white border border-gray-200 text-gray-800 font-medium py-2 px-5 rounded-lg shadow-sm hover:bg-gray-50 transition-all text-sm">
+                            Batal
+                        </button>
+                        <div class="relative">
+                            <button type="submit" id="btn-save-project" class="bg-white border border-gray-200 text-gray-900 font-medium py-2 px-6 rounded-lg shadow-sm hover:bg-gray-50 transition-all text-sm flex items-center justify-center min-w-[155px]">
+                                <span id="btn-save-text">Simpan Project</span>
+                            </button>
+                            <!-- Popover Notifikasi CTA (Khusus Error) -->
+                            <div id="save-popover" class="absolute bottom-full mb-3 right-0 bg-red-600 text-white text-xs py-2 px-3.5 rounded-lg shadow-xl opacity-0 pointer-events-none transition-all duration-300 transform translate-y-2 z-50 flex items-center gap-2 w-max">
+                                <i id="save-popover-icon" data-lucide="alert-circle" class="w-4 h-4"></i>
+                                <span id="save-popover-text" class="font-medium text-sm">Error!</span>
+                                <div id="save-popover-arrow" class="absolute top-full right-8 -mt-px border-[6px] border-transparent border-t-red-600"></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div id="view-profile" class="view-section hidden max-w-2xl mx-auto">
+                <h1 class="text-2xl font-semibold mb-6 text-gray-900">Profil Pengguna</h1>
+                <div class="p-6 border border-gray-200 rounded-xl bg-white flex flex-col sm:flex-row items-center gap-6 shadow-sm">
+                    <div class="w-24 h-24 bg-gray-100 border border-gray-200 rounded-full flex items-center justify-center text-gray-400 overflow-hidden">
+                        <img src="https://placehold.co/200x200/f3f4f6/9ca3af?text=JD" alt="Profile Large" class="w-full h-full object-cover">
+                    </div>
+                    <div class="text-center sm:text-left">
+                        <h2 class="text-lg font-medium text-gray-900">John Doe</h2>
+                        <p class="text-gray-500 text-sm mt-1">johndoe@example.com</p>
+                        <button class="mt-4 px-4 py-2 bg-white border border-gray-200 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
+                            Edit Profil
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-16 py-6 text-center text-xs text-gray-400">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 max-w-5xl mx-auto w-full px-2">
+                <p>&copy; 2026 Cloudseep. Hak Cipta Dilindungi.</p>
+                <div class="flex gap-4">
+                    <a href="#" class="hover:text-gray-600 transition-colors">Bantuan</a>
+                    <a href="#" class="hover:text-gray-600 transition-colors">Status Layanan</a>
+                    <a href="#" class="hover:text-gray-600 transition-colors">Kontak</a>
+                </div>
+            </div>
+        </footer>
+
+    </main>
+
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/20 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 z-50"></div>
+
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-white border-r border-gray-200 transform -translate-x-full transition-transform duration-300 z-[60] flex flex-col shadow-2xl">
+        
+        <div class="p-5 flex items-center justify-between border-b border-gray-100">
+            <div class="font-semibold text-lg tracking-tight flex items-center gap-2 text-gray-900">
+                <svg class="w-6 h-6 text-gray-800" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16.5 18C18.9853 18 21 15.9853 21 13.5C21 11.2355 19.3242 9.3607 17.1264 9.0435C16.377 6.368 13.9168 4.5 11 4.5C7.41015 4.5 4.5 7.41015 4.5 11C4.5 11.2212 4.5113 11.4398 4.5332 11.6552C3.12579 12.2754 2.1 13.7314 2.1 15.4C2.1 17.6091 3.89086 19.4 6.1 19.4H16.5Z" fill="#F3F4F6" stroke="#374151" stroke-width="1.5" stroke-linejoin="round"/>
+                    <path d="M7 15C7 15 8.5 13.5 10 15" stroke="#9CA3AF" stroke-width="1.2" stroke-linecap="round"/>
+                    <path d="M12 10C12 10 13.5 8.5 15 10" stroke="#9CA3AF" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+                Cloudseep
+            </div>
+            <button id="btn-close-sidebar" class="p-1.5 text-gray-400 hover:text-gray-800 rounded-md hover:bg-gray-100 transition-colors">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto custom-scrollbar p-5 pb-20">
+            
+            <div class="mb-5 pb-5 border-b border-gray-100">
+                <button onclick="openProjectForm()" class="w-full bg-white border border-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg shadow-sm hover:bg-gray-50 transition-all flex items-center justify-center gap-2 text-sm">
+                    <i data-lucide="plus" class="w-4 h-4 text-gray-500"></i>
+                    Project Baru
+                </button>
+            </div>
+
+            <a href="#" onclick="switchView('view-beranda')" class="w-full flex items-center gap-3 text-sm font-medium text-gray-700 py-2 px-1 hover:text-black mb-4 transition-colors group">
+                <i data-lucide="home" class="w-4 h-4 text-gray-400 group-hover:text-gray-900 transition-colors"></i>
+                Beranda
+            </a>
+
+            <div class="mb-4">
+                <button onclick="toggleSidebarDropdown('menu-fitur', 'icon-fitur')" class="w-full flex items-center justify-between text-sm font-medium text-gray-900 py-2 px-1 hover:text-black transition-colors group">
+                    <span class="flex items-center gap-3 text-gray-500 group-hover:text-gray-900 transition-colors">
+                        <i data-lucide="box" class="w-4 h-4"></i>
+                        Fitur
+                    </span>
+                    <i id="icon-fitur" data-lucide="chevron-down" class="w-4 h-4 text-gray-400 transition-transform duration-200"></i>
+                </button>
+                <div id="menu-fitur" class="pl-3 mt-1 space-y-1 border-l border-gray-100 ml-2.5 hidden">
+                    <a href="#" class="flex items-center gap-3 py-2 px-3 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">
+                        <i data-lucide="database" class="w-4 h-4 text-gray-400"></i> Cloud (NoSQL)
+                    </a>
+                    <a href="#" class="flex items-center gap-3 py-2 px-3 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">
+                        <i data-lucide="hard-drive" class="w-4 h-4 text-gray-400"></i> Cloud Storage
+                    </a>
+                    <a href="#" class="flex items-center gap-3 py-2 px-3 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">
+                        <i data-lucide="globe" class="w-4 h-4 text-gray-400"></i> DNS Management
+                    </a>
+                    <a href="#" class="flex items-center gap-3 py-2 px-3 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">
+                        <i data-lucide="zap" class="w-4 h-4 text-gray-400"></i> Workers
+                    </a>
+                    <a href="#" class="flex items-center gap-3 py-2 px-3 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">
+                        <i data-lucide="shield" class="w-4 h-4 text-gray-400"></i> Keamanan & WAF
+                    </a>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <button onclick="toggleSidebarDropdown('menu-settings', 'icon-settings')" class="w-full flex items-center justify-between text-sm font-medium text-gray-900 py-2 px-1 hover:text-black transition-colors group">
+                    <span class="flex items-center gap-3 text-gray-500 group-hover:text-gray-900 transition-colors">
+                        <i data-lucide="settings-2" class="w-4 h-4"></i>
+                        Settings
+                    </span>
+                    <i id="icon-settings" data-lucide="chevron-down" class="w-4 h-4 text-gray-400 transition-transform duration-200"></i>
+                </button>
+                <div id="menu-settings" class="pl-3 mt-1 space-y-1 border-l border-gray-100 ml-2.5 hidden">
+                    <a href="#" class="flex items-center gap-3 py-2 px-3 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">
+                        <i data-lucide="settings" class="w-4 h-4 text-gray-400"></i> Umum
+                    </a>
+                    <a href="#" class="flex items-center gap-3 py-2 px-3 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">
+                        <i data-lucide="credit-card" class="w-4 h-4 text-gray-400"></i> Billing
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </aside>
+
+    <!-- Modal Hapus Project -->
+    <div id="delete-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" onclick="closeDeleteModal()"></div>
+        <!-- Modal Content -->
+        <div id="delete-modal-content" class="relative bg-white rounded-xl shadow-2xl w-full max-w-sm mx-4 p-6 transform scale-95 opacity-0 transition-all duration-200 border border-gray-100">
+            <div class="flex items-center gap-4 mb-3">
+                <div class="w-10 h-10 rounded-full bg-red-50 border border-red-100 flex items-center justify-center shrink-0">
+                    <i data-lucide="alert-circle" class="w-5 h-5 text-red-500"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Hapus Project?</h3>
+            </div>
+            <p class="text-sm text-gray-600 mb-6 pl-14">Tindakan ini permanen dan project tidak dapat dikembalikan lagi setelah dihapus.</p>
+            <div class="flex justify-end gap-3">
+                <button onclick="closeDeleteModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all">Batal</button>
+                <button id="confirm-delete-btn" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 transition-all">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const btnOpen = document.getElementById('btn-open-sidebar');
+        const btnClose = document.getElementById('btn-close-sidebar');
+        
+        function openSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            overlay.classList.add('opacity-100');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.remove('opacity-100');
+            overlay.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        btnOpen.addEventListener('click', openSidebar);
+        btnClose.addEventListener('click', closeSidebar);
+        overlay.addEventListener('click', closeSidebar);
+
+        function toggleSidebarDropdown(menuId, iconId) {
+            const menu = document.getElementById(menuId);
+            const icon = document.getElementById(iconId);
+            menu.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
+
+        function switchView(viewId) {
+            const views = document.querySelectorAll('.view-section');
+            views.forEach(view => view.classList.add('hidden'));
+            document.getElementById(viewId).classList.remove('hidden');
+            
+            const btnSidebar = document.getElementById('btn-open-sidebar');
+            const btnBackHeader = document.getElementById('btn-back-header');
+            
+            if (viewId === 'view-project-form') {
+                btnSidebar.classList.add('hidden');
+                btnBackHeader.classList.remove('hidden');
+            } else {
+                btnSidebar.classList.remove('hidden');
+                btnBackHeader.classList.add('hidden');
+            }
+
+            closeSidebar();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- Logika Custom Dropdown Form (Pengganti Select bawaan) ---
+        function toggleCustomDropdown(event, dropdownId) {
+            event.stopPropagation(); // Mencegah dropdown tertutup otomatis oleh listener document
+            
+            // Tutup dropdown lain yang sedang terbuka
+            document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+                if (dropdown.id !== dropdownId) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+            
+            // Buka atau tutup dropdown yang diklik
+            const dropdownTarget = document.getElementById(dropdownId);
+            dropdownTarget.classList.toggle('hidden');
+        }
+
+        function selectDropdownOption(event, fieldId, realValue, displayValue) {
+            event.stopPropagation();
+            
+            // Set value input hidden untuk diproses saat submit
+            document.getElementById(`project-${fieldId}`).value = realValue;
+            
+            // Ubah text display yang dilihat pengguna
+            document.getElementById(`text-${fieldId}`).innerText = displayValue;
+            
+            // Tutup dropdown
+            document.getElementById(`dropdown-${fieldId}`).classList.add('hidden');
+        }
+
+        // --- Logika CRUD Project ---
+        
+        let projects = [
+            { id: 1, name: "Sistem Keuangan ERP", desc: "Aplikasi internal untuk departemen finance.", status: "Development" },
+            { id: 2, name: "Website Toko Kopi", desc: "Platform e-commerce untuk pemesanan kopi online.", status: "Production" }
+        ];
+        
+        let editingProjectId = null;
+        let projectToDeleteId = null;
+
+        function updateCharCount(input) {
+            const count = input.value.length;
+            const limit = 350;
+            const el = document.getElementById('desc-char-count');
+            
+            if (count > limit) {
+                input.value = input.value.substring(0, limit);
+                el.innerText = `${limit} / ${limit} karakter`;
+                el.classList.add('text-red-500');
+                el.classList.remove('text-gray-400');
+            } else {
+                el.innerText = `${count} / ${limit} karakter`;
+                el.classList.remove('text-red-500');
+                el.classList.add('text-gray-400');
+            }
+        }
+
+        function renderProjects() {
+            const tbody = document.getElementById('project-table-body');
+            const emptyState = document.getElementById('project-empty-state');
+            
+            tbody.innerHTML = '';
+            
+            if (projects.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+            
+            projects.forEach(project => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-gray-100 hover:bg-gray-50 transition-colors group";
+                
+                let statusColor = "bg-gray-300";
+                if (project.status === "Production") statusColor = "bg-green-500";
+                if (project.status === "Development") statusColor = "bg-blue-500";
+                if (project.status === "Maintenance") statusColor = "bg-yellow-500";
+
+                tr.innerHTML = `
+                    <td class="py-3 px-5 text-gray-900 font-medium whitespace-nowrap flex items-center gap-3">
+                        <i data-lucide="globe" class="w-5 h-5 text-gray-400"></i>
+                        ${project.name}
+                    </td>
+                    <td class="py-3 px-5 text-gray-600 truncate max-w-[200px]">${project.desc || '-'}</td>
+                    <td class="py-3 px-5 whitespace-nowrap">
+                        <span class="px-2.5 py-1 bg-white border border-gray-200 text-gray-700 rounded-md text-xs font-medium flex items-center gap-1.5 w-max">
+                            <div class="w-1.5 h-1.5 rounded-full ${statusColor}"></div> ${project.status}
+                        </span>
+                    </td>
+                    <td class="py-3 px-5 relative text-center">
+                        <button onclick="toggleActionMenu(event, 'action-${project.id}')" class="p-1.5 text-gray-400 hover:text-gray-800 rounded-md hover:bg-gray-200 transition-colors focus:outline-none">
+                            <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                        </button>
+                        <div id="action-${project.id}" class="action-popup hidden fixed w-32 bg-white rounded-lg shadow-xl z-[90] py-1 text-left border border-gray-100">
+                            <a href="#" onclick="event.preventDefault(); editProject(${project.id})" class="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 hover:text-gray-900 flex items-center gap-2"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i> Edit</a>
+                            <div class="my-1 border-t border-gray-100"></div>
+                            <a href="#" onclick="event.preventDefault(); openDeleteModal(${project.id})" class="block px-3 py-1.5 text-xs text-gray-600 hover:bg-red-50 hover:text-red-600 flex items-center gap-2 transition-colors"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Hapus</a>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            lucide.createIcons();
+        }
+
+        // --- Logika Custom Modal Hapus ---
+        function openDeleteModal(id) {
+            // Tutup popup aksi yang sedang terbuka
+            document.querySelectorAll('.action-popup').forEach(p => p.classList.add('hidden'));
+            
+            projectToDeleteId = id;
+            const modal = document.getElementById('delete-modal');
+            const content = document.getElementById('delete-modal-content');
+            
+            modal.classList.remove('hidden');
+            // Trigger reflow
+            void modal.offsetWidth; 
+            
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }
+
+        function closeDeleteModal() {
+            const modal = document.getElementById('delete-modal');
+            const content = document.getElementById('delete-modal-content');
+            
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                projectToDeleteId = null;
+            }, 200); 
+        }
+
+        document.getElementById('confirm-delete-btn').addEventListener('click', () => {
+            if (projectToDeleteId !== null) {
+                projects = projects.filter(p => p.id !== projectToDeleteId);
+                renderProjects();
+                closeDeleteModal();
+            }
+        });
+
+        function openProjectForm(isEdit = false) {
+            switchView('view-project-form');
+            const titleEl = document.getElementById('form-project-title');
+            const form = document.getElementById('project-form');
+            
+            if (isEdit && editingProjectId) {
+                titleEl.innerText = "Edit Project";
+                const project = projects.find(p => p.id === editingProjectId);
+                if(project) {
+                    document.getElementById('project-name').value = project.name;
+                    document.getElementById('project-desc').value = project.desc;
+                    updateCharCount(document.getElementById('project-desc'));
+                }
+            } else {
+                titleEl.innerText = "Buat Project Baru";
+                editingProjectId = null;
+                form.reset();
+                document.getElementById('desc-char-count').innerText = "0 / 350 karakter";
+                document.getElementById('project-name').classList.remove('border-red-500', 'ring-red-500');
+                
+                // Reset custom dropdown values ke default
+                document.getElementById('project-visibility').value = 'Public';
+                document.getElementById('text-visibility').innerText = 'Publik';
+                
+                document.getElementById('project-template').value = 'Tanpa template';
+                document.getElementById('text-template').innerText = 'Tanpa template';
+                
+                document.getElementById('project-license').value = 'Tanpa lisensi';
+                document.getElementById('text-license').innerText = 'Tanpa lisensi';
+            }
+        }
+
+        function saveProject(e) {
+            e.preventDefault();
+            
+            const nameInput = document.getElementById('project-name');
+            const name = nameInput.value.trim();
+            const desc = document.getElementById('project-desc').value.trim();
+            const status = "Development"; 
+            
+            const popover = document.getElementById('save-popover');
+            const popoverText = document.getElementById('save-popover-text');
+            const btnSave = document.getElementById('btn-save-project');
+            
+            // Validasi Input
+            if (!name) {
+                popoverText.innerText = 'Nama project wajib diisi!';
+                
+                popover.classList.remove('opacity-0', 'translate-y-2');
+                popover.classList.add('opacity-100', 'translate-y-0');
+                
+                nameInput.classList.add('border-red-500', 'ring-red-500');
+                nameInput.focus();
+                
+                setTimeout(() => {
+                    popover.classList.remove('opacity-100', 'translate-y-0');
+                    popover.classList.add('opacity-0', 'translate-y-2');
+                    nameInput.classList.remove('border-red-500', 'ring-red-500');
+                }, 3000);
+                
+                return;
+            }
+
+            // Kunci tombol dan tambahkan animasi loading
+            btnSave.disabled = true;
+            btnSave.classList.add('opacity-75', 'cursor-not-allowed', 'bg-gray-50');
+            btnSave.innerHTML = `<svg class="animate-spin h-4 w-4 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span class="ml-2">Menyimpan...</span>`;
+
+            // Simulasi loading selama 1 detik
+            setTimeout(() => {
+                // Logika Penyimpanan
+                if (editingProjectId) {
+                    const index = projects.findIndex(p => p.id === editingProjectId);
+                    if(index !== -1) {
+                        projects[index] = { ...projects[index], name, desc }; 
+                    }
+                } else {
+                    const newId = projects.length > 0 ? Math.max(...projects.map(p => p.id)) + 1 : 1;
+                    projects.push({ id: newId, name, desc, status });
+                }
+                
+                // Reset tombol kembali ke awal
+                btnSave.disabled = false;
+                btnSave.classList.remove('opacity-75', 'cursor-not-allowed', 'bg-gray-50');
+                btnSave.innerHTML = `<span id="btn-save-text">Simpan Project</span>`;
+                
+                // Redirect ke Dashboard dan render proyek (tanpa popup sukses)
+                renderProjects();
+                switchView('view-beranda');
+            }, 1000);
+        }
+
+        function editProject(id) {
+            editingProjectId = id;
+            openProjectForm(true);
+        }
+        
+        // --- Logika Action Popup Menu dan Global Click Listener ---
+        function toggleActionMenu(event, actionId) {
+            event.stopPropagation();
+            
+            const popup = document.getElementById(actionId);
+            const button = event.currentTarget;
+            const isHidden = popup.classList.contains('hidden');
+            
+            const allPopups = document.querySelectorAll('.action-popup');
+            allPopups.forEach(p => p.classList.add('hidden'));
+            
+            if (isHidden) {
+                popup.classList.remove('hidden');
+                
+                const btnRect = button.getBoundingClientRect();
+                const popupRect = popup.getBoundingClientRect();
+                const spaceBelow = window.innerHeight - btnRect.bottom;
+                
+                popup.style.left = (btnRect.right - popupRect.width) + 'px';
+                
+                if (spaceBelow < (popupRect.height + 10) && btnRect.top > (popupRect.height + 10)) {
+                    popup.style.top = (btnRect.top - popupRect.height - 5) + 'px';
+                } else {
+                    popup.style.top = (btnRect.bottom + 5) + 'px';
+                }
+            }
+        }
+
+        // Global Event Listener untuk menutup popup atau custom dropdown jika diklik di luarnya
+        document.addEventListener('click', function(event) {
+            // Tutup Action Menu Popup
+            const allPopups = document.querySelectorAll('.action-popup');
+            allPopups.forEach(popup => {
+                if (!popup.classList.contains('hidden')) {
+                    popup.classList.add('hidden');
+                }
+            });
+
+            // Tutup Custom Dropdowns (Select Replacement)
+            const allDropdowns = document.querySelectorAll('.custom-dropdown');
+            allDropdowns.forEach(dropdown => {
+                // jika element yang diklik bukan bagian dari dropdown ini, tutup.
+                if (!dropdown.contains(event.target) && !dropdown.classList.contains('hidden')) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+        });
+
+        // Tutup semua saat window discroll agar letak tidak berantakan
+        window.addEventListener('scroll', function() {
+            document.querySelectorAll('.action-popup').forEach(p => p.classList.add('hidden'));
+            document.querySelectorAll('.custom-dropdown').forEach(p => p.classList.add('hidden'));
+        }, true);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProjects();
+        });
+        
+    </script>
+</body>
+</html>
