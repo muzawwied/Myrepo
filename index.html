@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vylonium - Platform Profesional</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #000000;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+        /* Smooth Transitions */
+        .sidebar-transition { transition: transform 0.3s ease-in-out; }
+        .dropdown-transition {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            max-height: 0; opacity: 0; overflow: hidden;
+        }
+        .dropdown-transition.open { max-height: 500px; opacity: 1; }
+        .modal-transition { transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out; }
+        
+        /* Hide elements utility */
+        .page-hidden { display: none !important; }
+    </style>
+</head>
+<body class="antialiased h-screen w-full overflow-hidden flex flex-col">
+
+    <!-- ========================================== -->
+    <!-- AUTHENTICATION LAYOUT (Login/Register)     -->
+    <!-- ========================================== -->
+    <div id="auth-layout" class="w-full h-full flex items-center justify-center bg-gray-50 overflow-y-auto py-10 relative">
+        
+        <!-- Form Container -->
+        <div class="w-full max-w-md bg-white border border-gray-200 rounded-2xl p-8 shadow-sm relative z-10">
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-bold tracking-tight" id="auth-title">Masuk ke Akun</h1>
+                <p class="text-sm text-gray-500 mt-2" id="auth-subtitle">Selamat datang kembali di Vylonium</p>
+            </div>
+
+            <!-- Login Form -->
+            <form id="form-login" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Email</label>
+                    <input type="email" required class="w-full px-4 py-2 bg-white border border-gray-300 rounded-full focus:outline-none focus:border-black transition-colors" placeholder="nama@email.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Password</label>
+                    <div class="relative">
+                        <input type="password" id="login-password" required class="w-full px-4 py-2 bg-white border border-gray-300 rounded-full focus:outline-none focus:border-black transition-colors pr-10" placeholder="••••••••">
+                        <button type="button" onclick="togglePasswordVisibility(this, 'login-password')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-black transition-colors">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-2.5 mt-2 bg-white border border-gray-300 text-black font-medium rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                    Masuk
+                </button>
+            </form>
+
+            <!-- Register Form (Hidden initially) -->
+            <form id="form-register" class="space-y-4 page-hidden">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Email</label>
+                    <input type="email" required class="w-full px-4 py-2 bg-white border border-gray-300 rounded-full focus:outline-none focus:border-black transition-colors" placeholder="nama@email.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Password</label>
+                    <div class="relative">
+                        <input type="password" id="reg-password" required class="w-full px-4 py-2 bg-white border border-gray-300 rounded-full focus:outline-none focus:border-black transition-colors pr-10" placeholder="••••••••">
+                        <button type="button" onclick="togglePasswordVisibility(this, 'reg-password')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-black transition-colors">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Konfirmasi Password</label>
+                    <div class="relative">
+                        <input type="password" id="reg-confirm-password" required class="w-full px-4 py-2 bg-white border border-gray-300 rounded-full focus:outline-none focus:border-black transition-colors pr-10" placeholder="••••••••">
+                        <button type="button" onclick="togglePasswordVisibility(this, 'reg-confirm-password')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-black transition-colors">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="w-full py-2.5 mt-2 bg-white border border-gray-300 text-black font-medium rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                    Daftar Sekarang
+                </button>
+            </form>
+
+            <div class="relative my-6">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-200"></div></div>
+                <div class="relative flex justify-center text-sm"><span class="px-2 bg-white text-gray-500">Atau lanjutkan dengan</span></div>
+            </div>
+
+            <!-- OAuth Buttons -->
+            <div class="space-y-3">
+                <button onclick="handleOAuthLogin('Google')" class="w-full py-2.5 bg-white border border-gray-300 text-black font-medium rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center gap-3">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Google
+                </button>
+                <button onclick="handleOAuthLogin('Github')" class="w-full py-2.5 bg-white border border-gray-300 text-black font-medium rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center gap-3">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.699-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z"></path>
+                    </svg>
+                    Github
+                </button>
+            </div>
+
+            <!-- 2 Checkboxes (Only visible on Register) -->
+            <div id="tos-container" class="mt-5 space-y-3 page-hidden">
+                <div class="flex items-start gap-2">
+                    <input type="checkbox" id="tos-check-1" class="mt-0.5 border-gray-300 rounded text-black focus:ring-black">
+                    <label for="tos-check-1" class="text-xs text-gray-500 leading-tight">
+                        Saya setuju dengan <a href="#" class="text-black underline font-medium">Syarat dan Ketentuan</a> dan <a href="#" class="text-black underline font-medium">Kebijakan Privasi</a>. *
+                    </label>
+                </div>
+                <div class="flex items-start gap-2">
+                    <input type="checkbox" id="tos-check-2" class="mt-0.5 border-gray-300 rounded text-black focus:ring-black">
+                    <label for="tos-check-2" class="text-xs text-gray-500 leading-tight">
+                        Kirimkan saya pembaruan produk, berita, dan penawaran khusus dari Vylonium.
+                    </label>
+                </div>
+            </div>
+
+            <!-- Toggle Auth Mode -->
+            <div class="mt-6 text-center text-sm text-gray-600 border-t border-gray-100 pt-6">
+                <span id="auth-switch-text">Belum punya akun?</span>
+                <button type="button" onclick="toggleAuthMode()" class="text-black font-semibold hover:underline ml-1" id="auth-switch-btn">Daftar</button>
+            </div>
+        </div>
+        
+        <!-- Subtle background styling -->
+        <div class="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-gray-200 to-transparent opacity-30 z-0"></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SETUP NAME PAGE (After Register)           -->
+    <!-- ========================================== -->
+    <div id="setup-name-layout" class="w-full h-full flex items-center justify-center bg-gray-50 page-hidden">
+        <div class="w-full max-w-md bg-white border border-gray-200 rounded-2xl p-8 shadow-sm text-center">
+            <h2 class="text-xl font-bold mb-2">Pilih Nama Pengguna</h2>
+            <p class="text-sm text-gray-500 mb-6">Nama ini akan digunakan di seluruh platform.</p>
+            
+            <form id="form-setup-name" class="space-y-4">
+                <div>
+                    <input type="text" id="username-input" required class="w-full px-4 py-2 bg-white border border-gray-300 rounded-full focus:outline-none focus:border-black transition-colors" placeholder="Ketik nama Anda">
+                    <p id="username-error" class="text-xs text-red-500 mt-2 text-left hidden">Nama sudah dipakai, silakan pilih yang lain.</p>
+                </div>
+                <button type="submit" class="w-full py-2.5 mt-2 bg-white border border-gray-300 text-black font-medium rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                    Lanjutkan ke Dashboard <i data-lucide="arrow-right" class="w-4 h-4 text-gray-600"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- MAIN APP LAYOUT (Dashboard & Pages)        -->
+    <!-- ========================================== -->
+    <div id="main-app-layout" class="flex-col h-full w-full bg-gray-50 page-hidden flex">
+        
+        <!-- Header -->
+        <header class="bg-white border-b border-gray-200 py-4 px-4 sm:px-6 flex items-center justify-between z-40 shrink-0 shadow-sm">
+            <div class="flex items-center gap-4">
+                <!-- Hamburger Menu / Back Button -->
+                <button id="main-header-btn" onclick="toggleSidebar()" class="p-1.5 bg-white border border-gray-300 hover:bg-gray-50 rounded-full transition-colors text-black" aria-label="Menu">
+                    <span id="icon-menu" class="flex items-center justify-center w-5 h-5">
+                        <!-- Custom SVG: Garis 3 tapi tengah lebih pendek -->
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="12" x2="16" y2="12"></line> 
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </span>
+                    <span id="icon-back" class="hidden flex items-center justify-center w-5 h-5">
+                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                    </span>
+                </button>
+                
+                <!-- Dynamic Page Title (sebelah menu) -->
+                <h1 id="header-page-title" class="text-lg font-semibold tracking-tight text-black hidden sm:block">Beranda</h1>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- Notif Icon (No dot) -->
+                <button class="p-2 bg-white border border-gray-300 text-gray-600 hover:text-black hover:bg-gray-50 rounded-full transition-colors">
+                    <i data-lucide="bell" class="w-4 h-4"></i>
+                </button>
+                
+                <!-- Profile / Avatar -->
+                <button onclick="navigateApp('Profile', 'Profile')" class="w-9 h-9 rounded-full bg-white border border-gray-300 overflow-hidden flex items-center justify-center hover:bg-gray-50 transition-colors">
+                    <i data-lucide="user" class="w-4 h-4 text-black"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto bg-[#fafafa] relative" id="content-container">
+            
+            <!-- ========================================== -->
+            <!-- HOME PAGE (Beranda) - CRUD PROJECT         -->
+            <!-- ========================================== -->
+            <div id="page-home" class="p-4 sm:p-8 max-w-6xl mx-auto w-full">
+                
+                <!-- Header Title & Add Button -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-black" id="welcome-text">Daftar Project</h2>
+                        <p class="text-sm text-gray-500 mt-1">Kelola semua layanan dan aplikasi Anda di satu tempat.</p>
+                    </div>
+                    <!-- CTA Create Project -->
+                    <button onclick="openProjectModal()" class="px-5 py-2.5 bg-white border border-gray-300 text-black font-medium text-sm rounded-full hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm shrink-0">
+                        <i data-lucide="plus" class="w-4 h-4 text-gray-600"></i> Buat Project Baru
+                    </button>
+                </div>
+
+                <!-- CRUD Table Container -->
+                <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-50 text-gray-500 uppercase text-xs font-semibold border-b border-gray-200">
+                                <tr>
+                                    <th scope="col" class="px-6 py-4">Nama Project</th>
+                                    <th scope="col" class="px-6 py-4">Domain / URL</th>
+                                    <th scope="col" class="px-6 py-4">Status</th>
+                                    <th scope="col" class="px-6 py-4 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="project-table-body" class="divide-y divide-gray-100">
+                                <!-- Baris tabel akan di-render menggunakan JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Empty State (Hidden if data exists) -->
+                    <div id="empty-state" class="py-16 flex flex-col items-center justify-center text-center hidden">
+                        <div class="w-16 h-16 bg-gray-50 border border-gray-200 rounded-full flex items-center justify-center mb-4">
+                            <i data-lucide="folder-open" class="w-8 h-8 text-gray-400"></i>
+                        </div>
+                        <h3 class="text-gray-900 font-medium mb-1">Belum ada project</h3>
+                        <p class="text-gray-500 text-sm max-w-sm mb-4">Anda belum memiliki project. Klik tombol buat project untuk memulai layanan baru Anda.</p>
+                    </div>
+                </div>
+
+            </div>
+            <!-- ========================================== -->
+            <!-- HOSTING PAGE - LIST (CRUD Table)           -->
+            <!-- ========================================== -->
+            <div id="page-hosting-list" class="p-4 sm:p-8 max-w-6xl mx-auto w-full page-hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-black tracking-tight">Hosting</h2>
+                        <p class="text-sm text-gray-500 mt-1">Kelola layanan web hosting dan deploy statis Anda.</p>
+                    </div>
+                    <!-- CTA Create -->
+                    <button onclick="goToHostingCreate()" class="px-5 py-2.5 bg-white border border-gray-300 text-black font-medium text-sm rounded-full hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm shrink-0">
+                        <i data-lucide="upload-cloud" class="w-4 h-4 text-gray-600"></i> Deploy Baru
+                    </button>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-gray-400 text-xs font-medium border-b border-gray-100">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3.5 font-medium">Nama Web</th>
+                                    <th scope="col" class="px-6 py-3.5 font-medium">Sumber</th>
+                                    <th scope="col" class="px-6 py-3.5 font-medium">Status</th>
+                                    <th scope="col" class="px-6 py-3.5 font-medium text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hosting-table-body" class="divide-y divide-gray-50">
+                                <!-- Baris tabel akan di-render menggunakan JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="hosting-empty-state" class="py-20 flex flex-col items-center justify-center text-center hidden">
+                        <div class="w-14 h-14 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                            <i data-lucide="server" class="w-6 h-6 text-gray-400"></i>
+                        </div>
+                        <h3 class="text-gray-900 font-medium mb-1">Belum ada web hosting</h3>
+                        <p class="text-gray-500 text-sm max-w-sm mb-4">Mulai deploy website statis atau aplikasi web Anda sekarang.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- HOSTING PAGE - SELECT DEPLOY METHOD        -->
+            <!-- ========================================== -->
+            <div id="page-hosting-create" class="p-4 sm:p-8 max-w-4xl mx-auto w-full page-hidden h-full flex flex-col">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-black tracking-tight">Pilih Metode Deploy</h2>
+                    <p class="text-sm text-gray-500 mt-1">Bagaimana Anda ingin membuat atau mengunggah website Anda?</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Option 1: Import -->
+                    <button onclick="goToHostingForm('import')" class="group relative text-left p-6 bg-white border border-gray-200 rounded-2xl hover:border-black transition-all flex flex-col h-full">
+                        <span class="absolute top-4 right-4 text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Disarankan</span>
+                        <div class="w-11 h-11 bg-gray-50 rounded-xl flex items-center justify-center mb-5 group-hover:bg-black transition-colors">
+                            <i data-lucide="github" class="w-5 h-5 text-black group-hover:text-white transition-colors"></i>
+                        </div>
+                        <h3 class="font-semibold text-base mb-1.5 text-black">Import dari Git</h3>
+                        <p class="text-sm text-gray-500 flex-1 leading-relaxed">Hubungkan repository GitHub atau GitLab untuk deploy otomatis berkelanjutan (CI/CD).</p>
+                    </button>
+
+                    <!-- Option 2: Upload -->
+                    <button onclick="goToHostingForm('upload')" class="group text-left p-6 bg-white border border-gray-200 rounded-2xl hover:border-black transition-all flex flex-col h-full">
+                        <div class="w-11 h-11 bg-gray-50 rounded-xl flex items-center justify-center mb-5 group-hover:bg-black transition-colors">
+                            <i data-lucide="folder-up" class="w-5 h-5 text-black group-hover:text-white transition-colors"></i>
+                        </div>
+                        <h3 class="font-semibold text-base mb-1.5 text-black">Upload File</h3>
+                        <p class="text-sm text-gray-500 flex-1 leading-relaxed">Unggah langsung folder proyek Anda (HTML, CSS, JS) atau file ZIP secara manual.</p>
+                    </button>
+
+                    <!-- Option 3: Create New -->
+                    <button onclick="goToHostingForm('new')" class="group text-left p-6 bg-white border border-gray-200 rounded-2xl hover:border-black transition-all flex flex-col h-full">
+                        <div class="w-11 h-11 bg-gray-50 rounded-xl flex items-center justify-center mb-5 group-hover:bg-black transition-colors">
+                            <i data-lucide="file-plus-2" class="w-5 h-5 text-black group-hover:text-white transition-colors"></i>
+                        </div>
+                        <h3 class="font-semibold text-base mb-1.5 text-black">Buat File Baru</h3>
+                        <p class="text-sm text-gray-500 flex-1 leading-relaxed">Mulai dari awal menggunakan template kosong atau editor kode bawaan platform.</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- HOSTING PAGE - CRUD FORM                   -->
+            <!-- ========================================== -->
+            <div id="page-hosting-form" class="p-4 sm:p-8 max-w-3xl mx-auto w-full page-hidden h-full flex flex-col">
+                <div class="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 mt-2">
+                    <h2 class="text-2xl font-bold text-black mb-1 tracking-tight" id="hosting-form-title">Konfigurasi Hosting</h2>
+                    <p class="text-sm text-gray-500 mb-7" id="hosting-form-subtitle">Atur detail website yang akan di deploy.</p>
+
+                    <form id="form-hosting" class="space-y-5">
+                        <input type="hidden" id="hosting-id">
+                        <input type="hidden" id="hosting-method">
+                        
+                        <div>
+                            <label class="block text-sm font-medium mb-1.5 text-gray-700">Nama Website</label>
+                            <input type="text" id="hosting-name" required class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-black transition-colors text-sm" placeholder="Contoh: Portofolio Pribadi">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium mb-1.5 text-gray-700">Nama Path (Slug)</label>
+                            <div class="flex items-center">
+                                <span id="hosting-url-prefix" class="px-4 py-2.5 bg-gray-50 border border-gray-200 border-r-0 rounded-l-xl text-gray-400 text-sm whitespace-nowrap max-w-[45%] truncate">sites/</span>
+                                <input type="text" id="hosting-domain" required oninput="updateHostingUrlPreview()" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-r-xl focus:outline-none focus:border-black transition-colors text-sm" placeholder="nama-web">
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1.5 flex items-center gap-1 truncate">
+                                <i data-lucide="link" class="w-3 h-3 shrink-0"></i> URL asli: <span id="hosting-url-preview" class="text-gray-600 font-medium truncate">nama-web</span>
+                            </p>
+                        </div>
+
+                        <!-- Dynamic Input based on method -->
+                        <div id="hosting-dynamic-input" class="p-4 bg-gray-50 rounded-xl">
+                            <!-- Injected by JS -->
+                        </div>
+
+                        <div class="pt-3">
+                            <button type="submit" id="hosting-submit-btn" class="w-full py-3 bg-white border border-gray-300 text-black font-medium rounded-full hover:bg-gray-50 transition-colors text-sm flex items-center justify-center gap-2 shadow-sm">
+                                <i data-lucide="rocket" class="w-4 h-4 text-gray-600"></i> Simpan & Deploy
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
+
+            <!-- DYNAMIC BLANK PAGE (For Features & Settings) -->
+            <div id="page-dynamic" class="p-6 sm:p-10 max-w-6xl mx-auto w-full page-hidden h-full flex flex-col">
+                <div class="flex-1 flex flex-col items-center justify-center text-center opacity-60">
+                    <div id="dynamic-icon" class="mb-4 text-gray-400">
+                        <i data-lucide="layers" class="w-16 h-16"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-black mb-2" id="dynamic-title">Halaman Kosong</h2>
+                    <p class="text-gray-500 max-w-md">Ini adalah halaman yang hanya menampilkan header dan CTA sesuai permintaan.</p>
+                    
+                    <button class="mt-8 px-6 py-2.5 bg-white border border-gray-300 text-black font-medium rounded-full hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm">
+                        <i data-lucide="settings-2" class="w-4 h-4 text-gray-600"></i> Buka Konfigurasi
+                    </button>
+                </div>
+            </div>
+            
+
+            <!-- PROJECT DETAIL -->
+            <div id="page-project-detail" class="p-4 sm:p-8 max-w-6xl mx-auto w-full page-hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                    <div>
+                        <h2 id="proj-detail-name" class="text-2xl font-bold text-black tracking-tight">Project</h2>
+                        <a id="proj-detail-url" href="#" target="_blank" class="text-sm text-gray-400 hover:text-black flex items-center gap-1 mt-1 transition-colors">&nbsp;</a>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="flex items-center gap-1.5 text-xs font-medium text-green-700 border border-green-200 bg-green-50 px-3 py-1.5 rounded-full"><span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Active</span>
+                        <button id="proj-detail-edit-btn" class="px-4 py-2 bg-white border border-gray-300 text-black text-sm font-medium rounded-full hover:bg-gray-50 transition-colors flex items-center gap-2">
+                            <i data-lucide="edit-2" class="w-4 h-4 text-gray-500"></i> Edit
+                        </button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><p class="text-xs text-gray-400 uppercase tracking-wide mb-2">Services</p><p class="text-2xl font-bold text-black">2</p><p class="text-xs text-gray-400 mt-1">Hosting, Cloud DB</p></div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><p class="text-xs text-gray-400 uppercase tracking-wide mb-2">Deployments</p><p class="text-2xl font-bold text-black">1</p><p class="text-xs text-gray-400 mt-1">Terakhir: Hari ini</p></div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><p class="text-xs text-gray-400 uppercase tracking-wide mb-2">Uptime</p><p class="text-2xl font-bold text-black">99.9<span class="text-sm text-gray-400">%</span></p><p class="text-xs text-gray-400 mt-1">30 hari terakhir</p></div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><p class="text-xs text-gray-400 uppercase tracking-wide mb-2">Storage</p><p class="text-2xl font-bold text-black">0.5<span class="text-sm text-gray-400"> GB</span></p><p class="text-xs text-gray-400 mt-1">dari 10 GB</p></div>
+                </div>
+                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Layanan Project</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <button onclick="navigateApp('Hosting','server')" class="text-left p-5 bg-white border border-gray-200 rounded-2xl hover:border-gray-400 transition-all">
+                        <div class="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center mb-4"><i data-lucide="server" class="w-5 h-5 text-gray-600"></i></div>
+                        <h4 class="font-semibold text-black mb-1">Hosting</h4><p class="text-sm text-gray-500">Deploy dan kelola web statis Anda.</p>
+                    </button>
+                    <button onclick="navigateApp('Cloud (Database NoSQL)','database')" class="text-left p-5 bg-white border border-gray-200 rounded-2xl hover:border-gray-400 transition-all">
+                        <div class="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center mb-4"><i data-lucide="database" class="w-5 h-5 text-gray-600"></i></div>
+                        <h4 class="font-semibold text-black mb-1">Cloud Database</h4><p class="text-sm text-gray-500">NoSQL database serverless Anda.</p>
+                    </button>
+                    <button onclick="navigateApp('Cloud Storage','hard-drive')" class="text-left p-5 bg-white border border-gray-200 rounded-2xl hover:border-gray-400 transition-all">
+                        <div class="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center mb-4"><i data-lucide="hard-drive" class="w-5 h-5 text-gray-600"></i></div>
+                        <h4 class="font-semibold text-black mb-1">Cloud Storage</h4><p class="text-sm text-gray-500">Kelola aset dan file project Anda.</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CLOUD DATABASE NoSQL -->
+            <div id="page-cloud" class="p-4 sm:p-8 max-w-6xl mx-auto w-full page-hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                    <div><h2 class="text-2xl font-bold text-black tracking-tight">Cloud Database</h2><p class="text-sm text-gray-500 mt-1">NoSQL document database serverless untuk aplikasi Anda.</p></div>
+                    <button onclick="addCollection()" class="px-5 py-2.5 bg-white border border-gray-300 text-black font-medium text-sm rounded-full hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm shrink-0">
+                        <i data-lucide="plus" class="w-4 h-4 text-gray-600"></i> Buat Collection
+                    </button>
+                </div>
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Collections</p><p class="text-2xl font-bold text-black">2</p></div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Total Dokumen</p><p class="text-2xl font-bold text-black">2,140</p></div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Ukuran Total</p><p class="text-2xl font-bold text-black">3.5<span class="text-sm text-gray-400"> MB</span></p></div>
+                </div>
+                <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-gray-400 text-xs font-medium border-b border-gray-100"><tr>
+                                <th class="px-6 py-3.5">Nama Collection</th><th class="px-6 py-3.5">Dokumen</th><th class="px-6 py-3.5">Ukuran</th><th class="px-6 py-3.5">Dibuat</th><th class="px-6 py-3.5 text-right">Aksi</th>
+                            </tr></thead>
+                            <tbody id="collections-tbody" class="divide-y divide-gray-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CLOUD STORAGE -->
+            <div id="page-storage" class="p-4 sm:p-8 max-w-6xl mx-auto w-full page-hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                    <div><h2 class="text-2xl font-bold text-black tracking-tight">Cloud Storage</h2><p class="text-sm text-gray-500 mt-1">Kelola aset dan file statis untuk project Anda.</p></div>
+                    <button class="px-5 py-2.5 bg-white border border-gray-300 text-black font-medium text-sm rounded-full hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm shrink-0">
+                        <i data-lucide="upload" class="w-4 h-4 text-gray-600"></i> Upload File
+                    </button>
+                </div>
+                <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-6">
+                    <div class="flex justify-between text-sm mb-2"><span class="font-medium text-black">Penggunaan Storage</span><span class="text-gray-500">2.1 GB / 10 GB</span></div>
+                    <div class="w-full bg-gray-100 rounded-full h-2"><div class="bg-black h-2 rounded-full" style="width:21%"></div></div>
+                    <p class="text-xs text-gray-400 mt-2">Free tier — 7.9 GB tersisa</p>
+                </div>
+                <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-gray-400 text-xs font-medium border-b border-gray-100"><tr>
+                                <th class="px-6 py-3.5">Nama File</th><th class="px-6 py-3.5">Tipe</th><th class="px-6 py-3.5">Ukuran</th><th class="px-6 py-3.5">Diupload</th><th class="px-6 py-3.5 text-right">Aksi</th>
+                            </tr></thead>
+                            <tbody id="storage-tbody" class="divide-y divide-gray-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DNS MANAGEMENT -->
+            <div id="page-dns" class="p-4 sm:p-8 max-w-6xl mx-auto w-full page-hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                    <div><h2 class="text-2xl font-bold text-black tracking-tight">DNS Management</h2><p class="text-sm text-gray-500 mt-1">Kelola record DNS untuk domain Anda.</p></div>
+                    <button onclick="showToast('Fitur tambah record DNS segera hadir!')" class="px-5 py-2.5 bg-white border border-gray-300 text-black font-medium text-sm rounded-full hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm shrink-0">
+                        <i data-lucide="plus" class="w-4 h-4 text-gray-600"></i> Tambah Record
+                    </button>
+                </div>
+                <div class="bg-white border border-gray-200 rounded-2xl p-4 mb-6 flex items-center gap-3">
+                    <i data-lucide="globe" class="w-4 h-4 text-gray-400 shrink-0"></i>
+                    <span class="text-sm font-mono text-black">muzawwied.github.io</span>
+                    <span class="ml-auto text-xs text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Aktif</span>
+                </div>
+                <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-gray-400 text-xs font-medium border-b border-gray-100"><tr>
+                                <th class="px-6 py-3.5">Tipe</th><th class="px-6 py-3.5">Nama</th><th class="px-6 py-3.5">Nilai / Target</th><th class="px-6 py-3.5">TTL</th><th class="px-6 py-3.5 text-right">Aksi</th>
+                            </tr></thead>
+                            <tbody id="dns-tbody" class="divide-y divide-gray-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WORKERS (Segera Hadir) -->
+            <div id="page-workers" class="p-4 sm:p-8 max-w-4xl mx-auto w-full page-hidden">
+                <div class="text-center py-12">
+                    <div class="w-16 h-16 bg-gray-50 border border-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-5"><i data-lucide="cpu" class="w-8 h-8 text-gray-500"></i></div>
+                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Segera Hadir</span>
+                    <h2 class="text-2xl font-bold text-black mt-2 mb-3">Edge Workers</h2>
+                    <p class="text-gray-500 max-w-md mx-auto mb-8">Jalankan kode JavaScript/TypeScript di edge server terdekat pengguna — latensi ultra-rendah, tanpa cold start.</p>
+                    <button onclick="notifyMe('Edge Workers')" class="px-5 py-2.5 bg-white border border-gray-300 text-black font-medium text-sm rounded-full hover:bg-gray-50 transition-colors">Beritahu Saya</button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><i data-lucide="zap" class="w-5 h-5 text-gray-500 mb-3"></i><h4 class="font-semibold text-black mb-1">Ultra-Low Latency</h4><p class="text-sm text-gray-500">Eksekusi di edge node terdekat dari pengguna Anda.</p></div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><i data-lucide="trending-up" class="w-5 h-5 text-gray-500 mb-3"></i><h4 class="font-semibold text-black mb-1">Auto-Scale</h4><p class="text-sm text-gray-500">Skalakan otomatis tanpa konfigurasi infrastruktur.</p></div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><i data-lucide="timer" class="w-5 h-5 text-gray-500 mb-3"></i><h4 class="font-semibold text-black mb-1">0ms Cold Start</h4><p class="text-sm text-gray-500">Worker siap instan tanpa pemanasan.</p></div>
+                </div>
+            </div>
+
+            <!-- KEAMANAN & WAF (Segera Hadir) -->
+            <div id="page-security" class="p-4 sm:p-8 max-w-4xl mx-auto w-full page-hidden">
+                <div class="text-center py-12">
+                    <div class="w-16 h-16 bg-gray-50 border border-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-5"><i data-lucide="shield" class="w-8 h-8 text-gray-500"></i></div>
+                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Segera Hadir</span>
+                    <h2 class="text-2xl font-bold text-black mt-2 mb-3">Keamanan & WAF</h2>
+                    <p class="text-gray-500 max-w-md mx-auto mb-8">Lindungi aplikasi Anda dari DDoS, bot berbahaya, dan ancaman siber secara real-time.</p>
+                    <button onclick="notifyMe('Keamanan & WAF')" class="px-5 py-2.5 bg-white border border-gray-300 text-black font-medium text-sm rounded-full hover:bg-gray-50 transition-colors">Beritahu Saya</button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><i data-lucide="shield-check" class="w-5 h-5 text-gray-500 mb-3"></i><h4 class="font-semibold text-black mb-1">DDoS Protection</h4><p class="text-sm text-gray-500">Mitigasi serangan volumetrik otomatis.</p></div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><i data-lucide="scan-line" class="w-5 h-5 text-gray-500 mb-3"></i><h4 class="font-semibold text-black mb-1">Bot Detection</h4><p class="text-sm text-gray-500">Identifikasi dan blokir traffic bot berbahaya.</p></div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><i data-lucide="lock" class="w-5 h-5 text-gray-500 mb-3"></i><h4 class="font-semibold text-black mb-1">SSL/TLS Auto</h4><p class="text-sm text-gray-500">Sertifikat SSL gratis diperbarui otomatis.</p></div>
+                </div>
+            </div>
+
+            <!-- TUNNEL (Segera Hadir) -->
+            <div id="page-tunnel" class="p-4 sm:p-8 max-w-4xl mx-auto w-full page-hidden">
+                <div class="text-center py-12">
+                    <div class="w-16 h-16 bg-gray-50 border border-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-5"><i data-lucide="cable" class="w-8 h-8 text-gray-500"></i></div>
+                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Segera Hadir</span>
+                    <h2 class="text-2xl font-bold text-black mt-2 mb-3">Tunnel</h2>
+                    <p class="text-gray-500 max-w-md mx-auto mb-8">Expose server lokal ke internet secara aman dengan satu perintah — tanpa konfigurasi firewall.</p>
+                    <button onclick="notifyMe('Tunnel')" class="px-5 py-2.5 bg-white border border-gray-300 text-black font-medium text-sm rounded-full hover:bg-gray-50 transition-colors">Beritahu Saya</button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><i data-lucide="terminal" class="w-5 h-5 text-gray-500 mb-3"></i><h4 class="font-semibold text-black mb-1">Satu Perintah</h4><p class="text-sm text-gray-500"><code class="text-xs bg-gray-100 px-1 rounded">vylonium tunnel</code> — aktif dalam detik.</p></div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><i data-lucide="shield" class="w-5 h-5 text-gray-500 mb-3"></i><h4 class="font-semibold text-black mb-1">End-to-End Encrypted</h4><p class="text-sm text-gray-500">Traffic terenkripsi TLS dari browser hingga server.</p></div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><i data-lucide="globe" class="w-5 h-5 text-gray-500 mb-3"></i><h4 class="font-semibold text-black mb-1">Custom Subdomain</h4><p class="text-sm text-gray-500">URL publik tetap yang bisa dibagikan.</p></div>
+                </div>
+            </div>
+
+            <!-- IMAGE OPTIMIZATION (Segera Hadir) -->
+            <div id="page-imageopt" class="p-4 sm:p-8 max-w-4xl mx-auto w-full page-hidden">
+                <div class="text-center py-12">
+                    <div class="w-16 h-16 bg-gray-50 border border-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-5"><i data-lucide="image" class="w-8 h-8 text-gray-500"></i></div>
+                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Segera Hadir</span>
+                    <h2 class="text-2xl font-bold text-black mt-2 mb-3">Image Optimization</h2>
+                    <p class="text-gray-500 max-w-md mx-auto mb-8">Kompresi dan konversi otomatis ke WebP/AVIF — tanpa kehilangan kualitas visual.</p>
+                    <button onclick="notifyMe('Image Optimization')" class="px-5 py-2.5 bg-white border border-gray-300 text-black font-medium text-sm rounded-full hover:bg-gray-50 transition-colors">Beritahu Saya</button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><i data-lucide="file-image" class="w-5 h-5 text-gray-500 mb-3"></i><h4 class="font-semibold text-black mb-1">Auto WebP/AVIF</h4><p class="text-sm text-gray-500">Konversi otomatis ke format modern.</p></div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><i data-lucide="move" class="w-5 h-5 text-gray-500 mb-3"></i><h4 class="font-semibold text-black mb-1">Resize On-the-fly</h4><p class="text-sm text-gray-500">Ubah ukuran via URL parameter.</p></div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><i data-lucide="zap" class="w-5 h-5 text-gray-500 mb-3"></i><h4 class="font-semibold text-black mb-1">CDN Caching</h4><p class="text-sm text-gray-500">Disajikan dari edge CDN global.</p></div>
+                </div>
+            </div>
+
+            <!-- UMUM / SETTINGS -->
+            <div id="page-settings-general" class="p-4 sm:p-8 max-w-2xl mx-auto w-full page-hidden">
+                <div class="mb-8"><h2 class="text-2xl font-bold text-black tracking-tight">Pengaturan Umum</h2><p class="text-sm text-gray-500 mt-1">Konfigurasi dasar akun dan platform Anda.</p></div>
+                <div class="space-y-5">
+                    <div class="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
+                        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Informasi Akun</h3>
+                        <div><label class="block text-sm font-medium mb-1.5 text-gray-700">Nama Lengkap</label><input type="text" value="Muzawwied" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-black transition-colors text-sm"></div>
+                        <div><label class="block text-sm font-medium mb-1.5 text-gray-700">Email</label><input type="email" value="user@vylonium.io" readonly class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-400 cursor-not-allowed"><p class="text-xs text-gray-400 mt-1">Email tidak dapat diubah.</p></div>
+                        <div><label class="block text-sm font-medium mb-1.5 text-gray-700">Username</label><input type="text" value="muzawwied" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-black transition-colors text-sm"></div>
+                        <div><label class="block text-sm font-medium mb-1.5 text-gray-700">Zona Waktu</label>
+                            <select class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-black transition-colors text-sm">
+                                <option selected>Asia/Jakarta (WIB, UTC+7)</option>
+                                <option>Asia/Makassar (WITA, UTC+8)</option>
+                                <option>Asia/Jayapura (WIT, UTC+9)</option>
+                                <option>UTC</option>
+                            </select>
+                        </div>
+                        <button onclick="showToast('Pengaturan berhasil disimpan!')" class="px-5 py-2.5 bg-white border border-gray-300 text-black font-medium text-sm rounded-full hover:bg-gray-50 transition-colors">Simpan Perubahan</button>
+                    </div>
+                    <div class="bg-white border border-red-200 rounded-2xl p-6">
+                        <h3 class="text-sm font-semibold text-red-600 uppercase tracking-wide mb-3">Zona Bahaya</h3>
+                        <p class="text-sm text-gray-500 mb-4">Menghapus akun akan menghapus semua data secara permanen dan tidak dapat dipulihkan.</p>
+                        <button onclick="if(confirm('Yakin ingin menghapus akun?')) showToast('Permintaan penghapusan akun dikirim.')" class="px-5 py-2 bg-white border border-red-300 text-red-600 font-medium text-sm rounded-full hover:bg-red-50 transition-colors">Hapus Akun</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INTEGRASI -->
+            <div id="page-integrations" class="p-4 sm:p-8 max-w-4xl mx-auto w-full page-hidden">
+                <div class="mb-8"><h2 class="text-2xl font-bold text-black tracking-tight">Integrasi</h2><p class="text-sm text-gray-500 mt-1">Hubungkan Vylonium dengan tools yang Anda gunakan.</p></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5 flex items-center gap-4">
+                        <div class="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="github" class="w-5 h-5 text-white"></i></div>
+                        <div class="flex-1 min-w-0"><div class="font-semibold text-black">GitHub</div><div class="flex items-center gap-1.5 mt-0.5"><span id="int-dot-GitHub" class="w-2 h-2 rounded-full bg-green-500"></span><span id="int-label-GitHub" class="text-xs text-gray-500">Terhubung</span></div></div>
+                        <button onclick="toggleIntegration('GitHub',this)" class="px-3.5 py-1.5 bg-white border border-gray-300 text-black text-xs font-medium rounded-full hover:bg-gray-50 transition-colors shrink-0">Putuskan</button>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5 flex items-center gap-4">
+                        <div class="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="git-branch" class="w-5 h-5 text-white"></i></div>
+                        <div class="flex-1 min-w-0"><div class="font-semibold text-black">GitLab</div><div class="flex items-center gap-1.5 mt-0.5"><span id="int-dot-GitLab" class="w-2 h-2 rounded-full bg-gray-400"></span><span id="int-label-GitLab" class="text-xs text-gray-500">Tidak Terhubung</span></div></div>
+                        <button onclick="toggleIntegration('GitLab',this)" class="px-3.5 py-1.5 bg-white border border-gray-300 text-black text-xs font-medium rounded-full hover:bg-gray-50 transition-colors shrink-0">Hubungkan</button>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5 flex items-center gap-4">
+                        <div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="message-square" class="w-5 h-5 text-white"></i></div>
+                        <div class="flex-1 min-w-0"><div class="font-semibold text-black">Slack</div><div class="flex items-center gap-1.5 mt-0.5"><span id="int-dot-Slack" class="w-2 h-2 rounded-full bg-gray-400"></span><span id="int-label-Slack" class="text-xs text-gray-500">Tidak Terhubung</span></div></div>
+                        <button onclick="toggleIntegration('Slack',this)" class="px-3.5 py-1.5 bg-white border border-gray-300 text-black text-xs font-medium rounded-full hover:bg-gray-50 transition-colors shrink-0">Hubungkan</button>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5 flex items-center gap-4">
+                        <div class="w-10 h-10 bg-black rounded-xl flex items-center justify-center shrink-0"><i data-lucide="triangle" class="w-5 h-5 text-white"></i></div>
+                        <div class="flex-1 min-w-0"><div class="font-semibold text-black">Vercel</div><div class="flex items-center gap-1.5 mt-0.5"><span id="int-dot-Vercel" class="w-2 h-2 rounded-full bg-gray-400"></span><span id="int-label-Vercel" class="text-xs text-gray-500">Tidak Terhubung</span></div></div>
+                        <button onclick="toggleIntegration('Vercel',this)" class="px-3.5 py-1.5 bg-white border border-gray-300 text-black text-xs font-medium rounded-full hover:bg-gray-50 transition-colors shrink-0">Hubungkan</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TERMS OF SERVICE -->
+            <div id="page-tos" class="p-4 sm:p-8 max-w-3xl mx-auto w-full page-hidden">
+                <div class="mb-8"><h2 class="text-2xl font-bold text-black tracking-tight">Syarat dan Ketentuan</h2><p class="text-sm text-gray-400 mt-1">Terakhir diperbarui: 1 Juli 2026</p></div>
+                <div class="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 space-y-6 text-sm text-gray-700 leading-relaxed">
+                    <div><h3 class="font-semibold text-black text-base mb-2">1. Penerimaan Ketentuan</h3><p>Dengan mengakses dan menggunakan layanan Vylonium, Anda menyetujui untuk terikat dengan Syarat dan Ketentuan ini. Jika Anda tidak menyetujui syarat ini, harap hentikan penggunaan layanan kami.</p></div>
+                    <div><h3 class="font-semibold text-black text-base mb-2">2. Deskripsi Layanan</h3><p>Vylonium menyediakan layanan cloud infrastructure termasuk hosting statis, database NoSQL, cloud storage, dan layanan terkait. Layanan dapat berubah sewaktu-waktu tanpa pemberitahuan sebelumnya.</p></div>
+                    <div><h3 class="font-semibold text-black text-base mb-2">3. Akun Pengguna</h3><p>Anda bertanggung jawab menjaga kerahasiaan kredensial akun Anda. Setiap aktivitas yang terjadi di bawah akun Anda adalah tanggung jawab Anda sepenuhnya.</p></div>
+                    <div><h3 class="font-semibold text-black text-base mb-2">4. Penggunaan yang Dilarang</h3><p>Anda dilarang menggunakan layanan untuk aktivitas ilegal, distribusi malware, spam, pelanggaran hak cipta, atau aktivitas yang merugikan infrastruktur dan pengguna lain.</p></div>
+                    <div><h3 class="font-semibold text-black text-base mb-2">5. Batasan Tanggung Jawab</h3><p>Vylonium tidak bertanggung jawab atas kerugian tidak langsung yang timbul dari penggunaan layanan. Layanan disediakan "sebagaimana adanya" tanpa jaminan tersurat maupun tersirat.</p></div>
+                    <div><h3 class="font-semibold text-black text-base mb-2">6. Kontak</h3><p>Pertanyaan mengenai ketentuan ini: <a href="mailto:legal@vylonium.io" class="text-black underline">legal@vylonium.io</a></p></div>
+                </div>
+            </div>
+
+            <!-- PRIVACY POLICY -->
+            <div id="page-privacy" class="p-4 sm:p-8 max-w-3xl mx-auto w-full page-hidden">
+                <div class="mb-8"><h2 class="text-2xl font-bold text-black tracking-tight">Kebijakan Privasi</h2><p class="text-sm text-gray-400 mt-1">Terakhir diperbarui: 1 Juli 2026</p></div>
+                <div class="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 space-y-6 text-sm text-gray-700 leading-relaxed">
+                    <div><h3 class="font-semibold text-black text-base mb-2">1. Informasi yang Kami Kumpulkan</h3><p>Kami mengumpulkan informasi yang Anda berikan saat mendaftar (email, nama), data penggunaan layanan, dan informasi teknis perangkat Anda.</p></div>
+                    <div><h3 class="font-semibold text-black text-base mb-2">2. Penggunaan Informasi</h3><p>Informasi digunakan untuk menyediakan layanan, autentikasi, komunikasi, dan analisis untuk perbaikan produk.</p></div>
+                    <div><h3 class="font-semibold text-black text-base mb-2">3. Penyimpanan Data</h3><p>Data Anda disimpan di server dengan enkripsi dan kontrol akses yang ketat.</p></div>
+                    <div><h3 class="font-semibold text-black text-base mb-2">4. Berbagi Data</h3><p>Kami tidak menjual data pribadi Anda. Data hanya dibagikan ke penyedia infrastruktur dengan perjanjian kerahasiaan ketat.</p></div>
+                    <div><h3 class="font-semibold text-black text-base mb-2">5. Hak Pengguna</h3><p>Anda berhak mengakses, memperbaiki, atau menghapus data pribadi kapan saja. Hubungi: <a href="mailto:privacy@vylonium.io" class="text-black underline">privacy@vylonium.io</a></p></div>
+                </div>
+            </div>
+
+            <!-- FEEDBACK -->
+            <div id="page-feedback" class="p-4 sm:p-8 max-w-2xl mx-auto w-full page-hidden">
+                <div class="mb-8"><h2 class="text-2xl font-bold text-black tracking-tight">Feedback</h2><p class="text-sm text-gray-500 mt-1">Bantu kami berkembang — ceritakan pengalaman Anda.</p></div>
+                <div id="feedback-form-wrap" class="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 space-y-6">
+                    <div>
+                        <p class="text-sm font-medium text-gray-700 mb-3">Seberapa puas Anda dengan Vylonium?</p>
+                        <div class="flex gap-2">
+                            <button class="star-btn text-gray-300 hover:text-yellow-400 transition-colors" onclick="setFeedbackRating(1)"><i data-lucide="star" class="w-7 h-7 fill-current"></i></button>
+                            <button class="star-btn text-gray-300 hover:text-yellow-400 transition-colors" onclick="setFeedbackRating(2)"><i data-lucide="star" class="w-7 h-7 fill-current"></i></button>
+                            <button class="star-btn text-gray-300 hover:text-yellow-400 transition-colors" onclick="setFeedbackRating(3)"><i data-lucide="star" class="w-7 h-7 fill-current"></i></button>
+                            <button class="star-btn text-gray-300 hover:text-yellow-400 transition-colors" onclick="setFeedbackRating(4)"><i data-lucide="star" class="w-7 h-7 fill-current"></i></button>
+                            <button class="star-btn text-gray-300 hover:text-yellow-400 transition-colors" onclick="setFeedbackRating(5)"><i data-lucide="star" class="w-7 h-7 fill-current"></i></button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1.5 text-gray-700">Pesan / Saran</label>
+                        <textarea id="feedback-msg" rows="5" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-black transition-colors text-sm resize-none" placeholder="Ceritakan pengalaman Anda, fitur yang diinginkan, atau masalah yang ditemukan..."></textarea>
+                    </div>
+                    <button onclick="submitFeedback()" class="px-6 py-2.5 bg-white border border-gray-300 text-black font-medium text-sm rounded-full hover:bg-gray-50 transition-colors">Kirim Feedback</button>
+                </div>
+                <div id="feedback-success" class="bg-white border border-gray-200 rounded-2xl p-10 text-center page-hidden">
+                    <div class="w-14 h-14 bg-green-50 border border-green-200 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="check" class="w-7 h-7 text-green-600"></i></div>
+                    <h3 class="font-bold text-black text-lg mb-2">Terima kasih!</h3>
+                    <p class="text-gray-500 text-sm">Feedback Anda sangat berarti dan akan membantu meningkatkan Vylonium.</p>
+                    <button onclick="document.getElementById('feedback-form-wrap').classList.remove('page-hidden');document.getElementById('feedback-success').classList.add('page-hidden');feedbackRating=0;document.getElementById('feedback-msg').value='';" class="mt-5 px-5 py-2 bg-white border border-gray-300 text-black text-sm font-medium rounded-full hover:bg-gray-50 transition-colors">Kirim Lagi</button>
+                </div>
+            </div>
+
+            <!-- BILLING -->
+            <div id="page-billing" class="p-4 sm:p-8 max-w-4xl mx-auto w-full page-hidden">
+                <div class="mb-8"><h2 class="text-2xl font-bold text-black tracking-tight">Billing & Paket</h2><p class="text-sm text-gray-500 mt-1">Kelola langganan dan lihat penggunaan Anda.</p></div>
+                <div class="grid grid-cols-3 gap-4 mb-8">
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Bandwidth</p><p class="text-xl font-bold text-black">1.2 <span class="text-sm text-gray-400">GB</span></p><div class="w-full bg-gray-100 rounded-full h-1.5 mt-2"><div class="bg-black h-1.5 rounded-full" style="width:12%"></div></div><p class="text-xs text-gray-400 mt-1">dari 10 GB/bln</p></div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Storage</p><p class="text-xl font-bold text-black">2.1 <span class="text-sm text-gray-400">GB</span></p><div class="w-full bg-gray-100 rounded-full h-1.5 mt-2"><div class="bg-black h-1.5 rounded-full" style="width:21%"></div></div><p class="text-xs text-gray-400 mt-1">dari 10 GB</p></div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5"><p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Deployments</p><p class="text-xl font-bold text-black">3</p><div class="w-full bg-gray-100 rounded-full h-1.5 mt-2"><div class="bg-black h-1.5 rounded-full" style="width:3%"></div></div><p class="text-xs text-gray-400 mt-1">dari 100/bln</p></div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-gray-50 border-2 border-black rounded-2xl p-6 relative">
+                        <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">Paket Aktif</span>
+                        <h3 class="font-bold text-black text-lg mb-1">Free</h3><p class="text-2xl font-bold text-black mb-1">Rp 0<span class="text-sm font-normal text-gray-400">/bln</span></p>
+                        <ul class="text-sm text-gray-600 space-y-2 mt-4 mb-5">
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600"></i> 10 GB Storage</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600"></i> 10 GB Bandwidth/bln</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600"></i> 3 Projects</li>
+                            <li class="flex items-center gap-2"><i data-lucide="x" class="w-4 h-4 text-gray-400"></i> Custom Domain</li>
+                        </ul>
+                        <button disabled class="w-full py-2 bg-gray-200 text-gray-400 text-sm font-medium rounded-full cursor-not-allowed">Paket Sekarang</button>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-6">
+                        <h3 class="font-bold text-black text-lg mb-1">Pro</h3><p class="text-2xl font-bold text-black mb-1">Rp 99.000<span class="text-sm font-normal text-gray-400">/bln</span></p>
+                        <ul class="text-sm text-gray-600 space-y-2 mt-4 mb-5">
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600"></i> 100 GB Storage</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600"></i> 100 GB Bandwidth/bln</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600"></i> 20 Projects</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600"></i> Custom Domain</li>
+                        </ul>
+                        <button onclick="notifyUpgrade('Pro')" class="w-full py-2 bg-white border border-gray-300 text-black text-sm font-medium rounded-full hover:bg-gray-50 transition-colors">Upgrade ke Pro</button>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-6">
+                        <h3 class="font-bold text-black text-lg mb-1">Business</h3><p class="text-2xl font-bold text-black mb-1">Rp 299.000<span class="text-sm font-normal text-gray-400">/bln</span></p>
+                        <ul class="text-sm text-gray-600 space-y-2 mt-4 mb-5">
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600"></i> Unlimited Storage</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600"></i> 1 TB Bandwidth/bln</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600"></i> Unlimited Projects</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600"></i> Priority Support</li>
+                        </ul>
+                        <button onclick="notifyUpgrade('Business')" class="w-full py-2 bg-white border border-gray-300 text-black text-sm font-medium rounded-full hover:bg-gray-50 transition-colors">Upgrade ke Business</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROFILE -->
+            <div id="page-profile" class="p-4 sm:p-8 max-w-2xl mx-auto w-full page-hidden">
+                <div class="mb-8"><h2 class="text-2xl font-bold text-black tracking-tight">Profil Saya</h2><p class="text-sm text-gray-500 mt-1">Kelola informasi profil publik Anda.</p></div>
+                <div class="space-y-5">
+                    <div class="bg-white border border-gray-200 rounded-2xl p-6 space-y-5">
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 bg-gray-900 rounded-full flex items-center justify-center text-white text-xl font-bold shrink-0">M</div>
+                            <div><p class="font-semibold text-black">Muzawwied</p><p class="text-sm text-gray-400">@muzawwied</p></div>
+                        </div>
+                        <hr class="border-gray-100">
+                        <div><label class="block text-sm font-medium mb-1.5 text-gray-700">Nama Lengkap</label><input type="text" value="Muzawwied" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-black transition-colors text-sm"></div>
+                        <div><label class="block text-sm font-medium mb-1.5 text-gray-700">Username</label><input type="text" value="muzawwied" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-black transition-colors text-sm"></div>
+                        <div><label class="block text-sm font-medium mb-1.5 text-gray-700">Bio</label><textarea rows="3" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-black transition-colors text-sm resize-none" placeholder="Ceritakan sedikit tentang Anda..."></textarea></div>
+                        <div><label class="block text-sm font-medium mb-1.5 text-gray-700">Website</label><input type="url" placeholder="https://muzawwied.dev" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-black transition-colors text-sm"></div>
+                        <button onclick="showToast('Profil berhasil disimpan!')" class="px-5 py-2.5 bg-white border border-gray-300 text-black font-medium text-sm rounded-full hover:bg-gray-50 transition-colors">Simpan Perubahan</button>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
+                        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Ganti Password</h3>
+                        <div><label class="block text-sm font-medium mb-1.5 text-gray-700">Password Lama</label><input type="password" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-black transition-colors text-sm" placeholder="••••••••"></div>
+                        <div><label class="block text-sm font-medium mb-1.5 text-gray-700">Password Baru</label><input type="password" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-black transition-colors text-sm" placeholder="••••••••"></div>
+                        <div><label class="block text-sm font-medium mb-1.5 text-gray-700">Konfirmasi Password Baru</label><input type="password" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-black transition-colors text-sm" placeholder="••••••••"></div>
+                        <button onclick="showToast('Password berhasil diubah!')" class="px-5 py-2.5 bg-white border border-gray-300 text-black font-medium text-sm rounded-full hover:bg-gray-50 transition-colors">Ubah Password</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL CRUD PROJECT (Hidden by default)     -->
+    <!-- ========================================== -->
+    <div id="modal-project" class="fixed inset-0 bg-black/50 z-[70] flex items-center justify-center opacity-0 pointer-events-none modal-transition px-4">
+        <div class="bg-white w-full max-w-md rounded-2xl border border-gray-200 shadow-xl overflow-hidden scale-95 transition-transform duration-200" id="modal-project-content">
+            
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h3 class="font-bold text-lg" id="modal-project-title">Tambah Project</h3>
+                <button type="button" onclick="closeProjectModal()" class="text-gray-400 hover:text-black transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <form id="form-project" class="p-6 space-y-4">
+                <input type="hidden" id="project-id">
+                
+                <div>
+                    <label class="block text-sm font-medium mb-1.5 text-gray-700">Nama Project</label>
+                    <input type="text" id="project-name" required class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-black transition-colors text-sm" placeholder="Contoh: Web Portofolio">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-1.5 text-gray-700">Subdomain</label>
+                    <div class="flex items-center">
+                        <input type="text" id="project-domain" required class="w-full px-4 py-2 bg-white border border-gray-300 border-r-0 rounded-l-lg focus:outline-none focus:border-black transition-colors text-sm" placeholder="my-web">
+                        <span class="px-4 py-2 bg-gray-50 border border-gray-300 border-l-0 rounded-r-lg text-gray-500 text-sm whitespace-nowrap">.vylonium.app</span>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeProjectModal()" class="w-full py-2.5 bg-white border border-gray-300 text-gray-600 font-medium rounded-full hover:bg-gray-50 transition-colors text-sm">
+                        Batal
+                    </button>
+                    <button type="submit" class="w-full py-2.5 bg-white border border-gray-800 text-black font-medium rounded-full hover:bg-gray-50 transition-colors shadow-sm text-sm">
+                        Simpan Project
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SIDEBAR (Responsive, Sliding, Overlay)     -->
+    <!-- ========================================== -->
+    <div id="sidebar-overlay" onclick="closeSidebar()" class="fixed inset-0 bg-black/40 z-50 opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out hidden"></div>
+    
+    <aside id="sidebar-panel" class="fixed top-0 left-0 h-full w-72 bg-white border-r border-gray-200 z-[60] sidebar-transition -translate-x-full shadow-xl flex flex-col">
+        
+        <div class="h-[73px] border-b border-gray-200 px-6 flex items-center justify-between shrink-0">
+            <span class="font-bold text-xl tracking-tight text-black">Vylonium.</span>
+            <button onclick="closeSidebar()" class="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-full transition-colors lg:hidden">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-1">
+            <button onclick="navigateApp('Beranda', 'Home')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-black font-medium hover:bg-gray-100 transition-colors group">
+                <i data-lucide="home" class="w-5 h-5 text-gray-500 group-hover:text-black transition-colors"></i> Beranda
+            </button>
+
+            <!-- FITUR -->
+            <div class="mt-2">
+                <button onclick="toggleDropdown('menu-fitur', 'icon-fitur')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-black font-medium hover:bg-gray-100 transition-colors group">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="box" class="w-5 h-5 text-gray-500 group-hover:text-black transition-colors"></i> Fitur
+                    </div>
+                    <i data-lucide="chevron-down" id="icon-fitur" class="w-4 h-4 text-gray-400 transition-transform duration-300"></i>
+                </button>
+                <div id="menu-fitur" class="dropdown-transition pl-9 pr-2 flex flex-col gap-1 mt-1">
+                    <button onclick="navigateApp('Hosting', 'server')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"><i data-lucide="server" class="w-4 h-4 shrink-0"></i> Hosting</button>
+                    <button onclick="navigateApp('Cloud (Database NoSQL)', 'database')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"><i data-lucide="database" class="w-4 h-4 shrink-0"></i> Cloud</button>
+                    <button onclick="navigateApp('Cloud Storage', 'hard-drive')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"><i data-lucide="hard-drive" class="w-4 h-4 shrink-0"></i> Cloud Storage</button>
+                    <button onclick="navigateApp('DNS Management', 'globe')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"><i data-lucide="globe" class="w-4 h-4 shrink-0"></i> DNS Management</button>
+                    <button onclick="navigateApp('Workers', 'cpu')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"><i data-lucide="cpu" class="w-4 h-4 shrink-0"></i> Workers</button>
+                    <button onclick="navigateApp('Keamanan & WAF', 'shield')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"><i data-lucide="shield" class="w-4 h-4 shrink-0"></i> Keamanan & WAF</button>
+                    <button onclick="navigateApp('Tunnel', 'cable')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"><i data-lucide="cable" class="w-4 h-4 shrink-0"></i> Tunnel</button>
+                    <button onclick="navigateApp('Image Optimization', 'image')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"><i data-lucide="image" class="w-4 h-4 shrink-0"></i> Image Optimization</button>
+                </div>
+            </div>
+
+            <!-- SETTINGS -->
+            <div class="mt-2">
+                <button onclick="toggleDropdown('menu-settings', 'icon-settings')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-black font-medium hover:bg-gray-100 transition-colors group">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="settings" class="w-5 h-5 text-gray-500 group-hover:text-black transition-colors"></i> Settings
+                    </div>
+                    <i data-lucide="chevron-down" id="icon-settings" class="w-4 h-4 text-gray-400 transition-transform duration-300"></i>
+                </button>
+                <div id="menu-settings" class="dropdown-transition pl-9 pr-2 flex flex-col gap-1 mt-1">
+                    <button onclick="navigateApp('Umum', 'sliders')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"><i data-lucide="sliders" class="w-4 h-4 shrink-0"></i> Umum</button>
+                    <button onclick="navigateApp('Integrasi', 'plug')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"><i data-lucide="plug" class="w-4 h-4 shrink-0"></i> Integrasi</button>
+                    <button onclick="navigateApp('Terms of Service', 'file-text')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"><i data-lucide="file-text" class="w-4 h-4 shrink-0"></i> Terms of Service</button>
+                    <button onclick="navigateApp('Privacy Policy', 'shield-alert')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"><i data-lucide="shield-alert" class="w-4 h-4 shrink-0"></i> Privacy Policy</button>
+                    <button onclick="navigateApp('Feedback', 'message-square')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"><i data-lucide="message-square" class="w-4 h-4 shrink-0"></i> Feedback</button>
+                    <button onclick="navigateApp('Billing', 'credit-card')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"><i data-lucide="credit-card" class="w-4 h-4 shrink-0"></i> Billing</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-gray-200 shrink-0 bg-gray-50/50">
+            <button onclick="navigateApp('Profile', 'user')" class="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-gray-100 transition-colors text-left border border-transparent hover:border-gray-200">
+                <div class="w-10 h-10 rounded-full bg-white border border-gray-300 overflow-hidden flex items-center justify-center shrink-0">
+                    <i data-lucide="user" class="w-5 h-5 text-gray-500"></i>
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-sm font-semibold text-black truncate" id="sidebar-user-name">Nama Pengguna</p>
+                    <p class="text-xs text-gray-500 truncate" id="sidebar-user-email">email@contoh.com</p>
+                </div>
+            </button>
+            <button onclick="logout()" class="w-full mt-3 py-2 bg-white border border-gray-300 text-black text-sm font-medium rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                <i data-lucide="log-out" class="w-4 h-4 text-gray-600"></i> Keluar
+            </button>
+        </div>
+    </aside>
+
+    <!-- Firebase SDKs Setup via Module -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDSYKeF5sWa3bC3ZzmyvgV3gZXcQdl65sY",
+            authDomain: "vylonium.firebaseapp.com",
+            projectId: "vylonium",
+            storageBucket: "vylonium.firebasestorage.app",
+            messagingSenderId: "1081942967991",
+            appId: "1:1081942967991:web:331989d60e52e46817ef32",
+            measurementId: "G-32K4RH4DKN"
+        };
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            const analytics = getAnalytics(app);
+            console.log("Firebase initialized.");
+        } catch(e) {
+            console.warn("Firebase skipped", e);
+        }
+    </script>
+
+    <!-- Application Logic -->
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // State variables
+        let isLoginMode = true;
+        let tempUserEmail = "";
+        
+        // --- CRUD DATA STATE ---
+        let projects = [
+            { id: 1, name: "Web Portofolio", slug: "porto", status: "Active" },
+            { id: 2, name: "API Backend", slug: "api-prod", status: "Active" }
+        ];
+
+        // Fungsi untuk mendapatkan lokasi (base URL) hosting yang SEBENARNYA — dideteksi otomatis
+        // dari alamat tempat platform ini benar-benar berjalan, bukan domain karangan.
+        function getDeployBaseUrl() {
+            return window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
+        }
+
+        let hostingData = [
+            { id: 1, name: "Vylonium Platform (Repo Ini)", slug: "", url: "https://muzawwied.github.io/Vylonium-/", source: "GitHub (muzawwied/Vylonium-)", status: "Deployed", method: "import" }
+        ];
+
+
+        // --- AUTH LOGIC ---
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            
+            const formLogin = document.getElementById('form-login');
+            const formRegister = document.getElementById('form-register');
+            const tosContainer = document.getElementById('tos-container');
+            const title = document.getElementById('auth-title');
+            const subtitle = document.getElementById('auth-subtitle');
+            const switchText = document.getElementById('auth-switch-text');
+            const switchBtn = document.getElementById('auth-switch-btn');
+
+            if (isLoginMode) {
+                formLogin.classList.remove('page-hidden');
+                formRegister.classList.add('page-hidden');
+                tosContainer.classList.add('page-hidden');
+                
+                title.innerText = "Masuk ke Akun";
+                subtitle.innerText = "Selamat datang kembali di Vylonium";
+                switchText.innerText = "Belum punya akun?";
+                switchBtn.innerText = "Daftar";
+            } else {
+                formLogin.classList.add('page-hidden');
+                formRegister.classList.remove('page-hidden');
+                tosContainer.classList.remove('page-hidden');
+                
+                title.innerText = "Buat Akun Baru";
+                subtitle.innerText = "Mulai bangun infrastruktur Anda";
+                switchText.innerText = "Sudah punya akun?";
+                switchBtn.innerText = "Masuk";
+            }
+        }
+
+        document.getElementById('form-login').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = this.querySelector('input[type="email"]').value;
+            tempUserEmail = email;
+            completeLogin(email.split('@')[0], email);
+        });
+
+        document.getElementById('form-register').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Validasi Checkbox 1 (Syarat & Ketentuan)
+            const tos1 = document.getElementById('tos-check-1').checked;
+            
+            if (!tos1) {
+                alert("Anda harus menyetujui Syarat dan Ketentuan & Kebijakan Privasi untuk mendaftar.");
+                return;
+            }
+            
+            const email = this.querySelector('input[type="email"]').value;
+            tempUserEmail = email;
+            
+            document.getElementById('auth-layout').classList.add('page-hidden');
+            document.getElementById('setup-name-layout').classList.remove('page-hidden');
+        });
+
+        function handleOAuthLogin(provider) {
+            tempUserEmail = `user.${provider.toLowerCase()}@contoh.com`;
+            if (isLoginMode) {
+                // Jika mode masuk, langsung ke dashboard
+                completeLogin('Pengguna ' + provider, tempUserEmail);
+            } else {
+                // Jika mode daftar, baru minta setup nama
+                document.getElementById('auth-layout').classList.add('page-hidden');
+                document.getElementById('setup-name-layout').classList.remove('page-hidden');
+            }
+        }
+
+        document.getElementById('form-setup-name').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const usernameInput = document.getElementById('username-input').value.trim();
+            const errorMsg = document.getElementById('username-error');
+            
+            if (usernameInput.toLowerCase() === 'admin') {
+                errorMsg.classList.remove('hidden');
+            } else {
+                errorMsg.classList.add('hidden');
+                completeLogin(usernameInput, tempUserEmail);
+            }
+        });
+
+        function completeLogin(name, email) {
+            const sidebarUserName = document.getElementById('sidebar-user-name');
+            if (sidebarUserName) sidebarUserName.innerText = name;
+            
+            const sidebarUserEmail = document.getElementById('sidebar-user-email');
+            if (sidebarUserEmail) sidebarUserEmail.innerText = email;
+
+            document.getElementById('auth-layout').classList.add('page-hidden');
+            document.getElementById('setup-name-layout').classList.add('page-hidden');
+            document.getElementById('main-app-layout').classList.remove('page-hidden');
+            
+            navigateApp('Beranda', 'Home');
+            renderProjects(); // Render tabel saat masuk
+            renderHosting(); // Pre-render hosting
+        }
+
+        function logout() {
+            document.getElementById('main-app-layout').classList.add('page-hidden');
+            document.getElementById('auth-layout').classList.remove('page-hidden');
+            isLoginMode = true; 
+            toggleAuthMode();
+            toggleAuthMode(); 
+            closeSidebar();
+        }
+
+        // --- CRUD PROJECT LOGIC ---
+        
+        function renderProjects() {
+            const tbody = document.getElementById('project-table-body');
+            const emptyState = document.getElementById('empty-state');
+            const table = tbody.parentElement;
+            
+            tbody.innerHTML = '';
+            
+            if (projects.length === 0) {
+                emptyState.classList.remove('hidden');
+                table.classList.add('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                table.classList.remove('hidden');
+                
+                projects.forEach(proj => {
+                    const projUrl = getDeployBaseUrl().replace(/\/+$/, '') + '/projects/' + (proj.slug || '');
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-50 transition-colors group";
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 cursor-pointer" onclick="goToProjectDetail(${proj.id})">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-white border border-gray-300 flex items-center justify-center shrink-0">
+                                    <i data-lucide="box" class="w-4 h-4 text-gray-500"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-black hover:underline">${proj.name}</div>
+                                    <div class="text-xs text-gray-400">${proj.slug}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-gray-500 cursor-pointer" onclick="goToProjectDetail(${proj.id})">
+                            <span class="flex items-center gap-1.5 text-sm">
+                                <i data-lucide="globe" class="w-3.5 h-3.5"></i> ${projUrl}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 cursor-pointer" onclick="goToProjectDetail(${proj.id})">
+                            <span class="flex items-center gap-1.5 text-xs font-medium text-green-700">
+                                <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> ${proj.status}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end items-center gap-1.5 relative">
+                                <button onclick="goToProjectDetail(${proj.id})" class="p-1.5 text-gray-400 hover:text-black rounded-full transition-colors" title="Lihat Detail">
+                                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="toggleTableDropdown(event, ${proj.id}, this)" class="p-1.5 text-gray-400 hover:text-black hover:bg-gray-100 rounded-full transition-colors relative z-10" title="Aksi">
+                                    <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                                </button>
+                                <div id="dropdown-${proj.id}" class="table-dropdown hidden w-32 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden text-left origin-top-right">
+                                    <button onclick="openProjectModal(${proj.id}); closeAllTableDropdowns()" class="w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-black flex items-center gap-2 transition-colors">
+                                        <i data-lucide="edit-2" class="w-4 h-4"></i> Edit
+                                    </button>
+                                    <div class="w-full border-t border-gray-100"></div>
+                                    <button onclick="deleteProject(${proj.id}); closeAllTableDropdowns()" class="w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i> Hapus
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+            
+            // Re-render icons for dynamic elements
+            lucide.createIcons();
+        }
+
+        // Modal Handling untuk Project (Masih menggunakan Modal karena di beranda)
+        function openProjectModal(id = null) {
+            const modal = document.getElementById('modal-project');
+            const modalBox = document.getElementById('modal-project-content');
+            const title = document.getElementById('modal-project-title');
+            
+            // Clear or populate form
+            if (id) {
+                const proj = projects.find(p => p.id === id);
+                title.innerText = "Edit Project";
+                document.getElementById('project-id').value = proj.id;
+                document.getElementById('project-name').value = proj.name;
+                document.getElementById('project-domain').value = proj.slug || '';
+            } else {
+                title.innerText = "Buat Project Baru";
+                document.getElementById('form-project').reset();
+                document.getElementById('project-id').value = '';
+            }
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modalBox.classList.remove('scale-95');
+        }
+
+        function closeProjectModal() {
+            const modal = document.getElementById('modal-project');
+            const modalBox = document.getElementById('modal-project-content');
+            
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modalBox.classList.add('scale-95');
+        }
+
+        // Save (Create/Update)
+        document.getElementById('form-project').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('project-id').value;
+            const name = document.getElementById('project-name').value;
+            const slugRaw = document.getElementById('project-domain').value;
+            const slug = slugRaw.replace(/\s+/g, '-').toLowerCase().replace(/[^a-z0-9-]/g, '');
+
+            if (id) {
+                const index = projects.findIndex(p => p.id == id);
+                if(index !== -1) {
+                    projects[index].name = name;
+                    projects[index].slug = slug;
+                }
+            } else {
+                projects.push({
+                    id: Date.now(),
+                    name: name,
+                    slug: slug,
+                    status: "Active"
+                });
+            }
+
+            closeProjectModal();
+            renderProjects();
+        });
+
+        // Delete
+        function deleteProject(id) {
+            if(confirm("Apakah Anda yakin ingin menghapus project ini?")) {
+                projects = projects.filter(p => p.id !== id);
+                renderProjects();
+            }
+        }
+
+        // --- CRUD HOSTING LOGIC (PAGE TRANSITIONS) ---
+
+        // Fungsi untuk mengatur mode tombol header (Menu vs Back)
+        function setHeaderMenuMode(mode, actionFn = null) {
+            const btn = document.getElementById('main-header-btn');
+            const iconMenu = document.getElementById('icon-menu');
+            const iconBack = document.getElementById('icon-back');
+
+            if (mode === 'back') {
+                iconMenu.classList.add('hidden');
+                iconBack.classList.remove('hidden');
+                btn.onclick = actionFn;
+            } else {
+                iconMenu.classList.remove('hidden');
+                iconBack.classList.add('hidden');
+                btn.onclick = toggleSidebar;
+            }
+            lucide.createIcons();
+        }
+
+        function renderHosting() {
+            const tbody = document.getElementById('hosting-table-body');
+            const emptyState = document.getElementById('hosting-empty-state');
+            const table = tbody.parentElement;
+            
+            tbody.innerHTML = '';
+            
+            if (hostingData.length === 0) {
+                emptyState.classList.remove('hidden');
+                table.classList.add('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                table.classList.remove('hidden');
+                
+                hostingData.forEach(host => {
+                    let dotColor = host.status === 'Deployed' ? 'bg-green-500' : (host.status === 'Error' ? 'bg-red-500' : 'bg-yellow-500');
+                    let textColor = host.status === 'Deployed' ? 'text-green-700' : (host.status === 'Error' ? 'text-red-700' : 'text-yellow-700');
+                    let sourceIcon = host.method === 'import' ? 'github' : (host.method === 'upload' ? 'folder-up' : 'file-code');
+                    // URL asli dihitung otomatis dari lokasi tempat platform ini benar-benar berjalan
+                    let liveUrl = host.url || (host.slug ? (getDeployBaseUrl() + 'sites/' + host.slug + '/') : '');
+                    let displayLocation = liveUrl.replace(/^https?:\/\//, '');
+                    let hasLiveUrl = host.status === 'Deployed' && liveUrl;
+
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-50/70 transition-colors group";
+                    tr.innerHTML = `
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0">
+                                    <i data-lucide="server" class="w-4 h-4 text-gray-500"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-black">${host.name}</div>
+                                    ${hasLiveUrl ? `<a href="${liveUrl}" target="_blank" rel="noopener" class="text-xs text-gray-400 hover:text-black transition-colors flex items-center gap-1">${displayLocation} <i data-lucide="arrow-up-right" class="w-3 h-3"></i></a>` : `<div class="text-xs text-gray-400">${displayLocation || 'Menunggu deploy...'}</div>`}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-gray-500">
+                            <div class="flex items-center gap-1.5 text-xs">
+                                <i data-lucide="${sourceIcon}" class="w-3.5 h-3.5"></i> ${host.source}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="flex items-center gap-1.5 text-xs font-medium ${textColor}">
+                                <span class="w-1.5 h-1.5 rounded-full ${dotColor}"></span> ${host.status}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end items-center gap-1.5 relative">
+                                ${hasLiveUrl ? `<a href="${liveUrl}" target="_blank" rel="noopener" class="p-1.5 text-gray-400 hover:text-black rounded-full transition-colors" title="Buka situs">
+                                    <i data-lucide="external-link" class="w-4 h-4"></i>
+                                </a>` : ''}
+                                <!-- CTA Aksi Titik Tiga -->
+                                <button onclick="toggleTableDropdown(event, 'host-${host.id}', this)" class="p-1.5 text-gray-400 hover:text-black hover:bg-gray-100 rounded-full transition-colors relative z-10" title="Aksi">
+                                    <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                                </button>
+                                
+                                <!-- Dropdown Menu -->
+                                <div id="dropdown-host-${host.id}" class="table-dropdown hidden w-32 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden text-left origin-top-right">
+                                    <button onclick="goToHostingForm('edit', ${host.id}); closeAllTableDropdowns()" class="w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-black flex items-center gap-2 transition-colors">
+                                        <i data-lucide="edit-2" class="w-4 h-4"></i> Edit
+                                    </button>
+                                    <div class="w-full border-t border-gray-100"></div>
+                                    <button onclick="deleteHosting(${host.id}); closeAllTableDropdowns()" class="w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i> Hapus
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+            lucide.createIcons();
+        }
+
+        // Pindah ke Halaman Daftar Hosting
+        function goToHostingList() {
+            hideAllPages();
+            setHeaderMenuMode('menu');
+            document.getElementById('page-hosting-list').classList.remove('page-hidden');
+            document.getElementById('header-page-title').innerText = "Hosting";
+            renderHosting();
+        }
+
+        // Pindah ke Halaman Pemilihan Metode Deploy
+        function goToHostingCreate() {
+            hideAllPages();
+            setHeaderMenuMode('back', goToHostingList);
+            document.getElementById('page-hosting-create').classList.remove('page-hidden');
+            document.getElementById('header-page-title').innerText = "Deploy Baru";
+        }
+
+        // Pindah ke Halaman Form Hosting (Create / Edit)
+        function goToHostingForm(method, id = null) {
+            hideAllPages();
+            setHeaderMenuMode('back', id ? goToHostingList : goToHostingCreate);
+            document.getElementById('page-hosting-form').classList.remove('page-hidden');
+            
+            const titleEl = document.getElementById('hosting-form-title');
+            const subtitleEl = document.getElementById('hosting-form-subtitle');
+            const dynamicInputEl = document.getElementById('hosting-dynamic-input');
+            const form = document.getElementById('form-hosting');
+
+            form.reset();
+            document.getElementById('hosting-method').value = method;
+
+            if (id) {
+                // EDIT MODE
+                const host = hostingData.find(h => h.id === id);
+                document.getElementById('header-page-title').innerText = "Edit Hosting";
+                titleEl.innerText = "Edit Pengaturan Hosting";
+                subtitleEl.innerText = "Ubah konfigurasi untuk " + host.name;
+                
+                document.getElementById('hosting-id').value = host.id;
+                document.getElementById('hosting-name').value = host.name;
+                document.getElementById('hosting-domain').value = host.slug || '';
+                document.getElementById('hosting-method').value = host.method;
+                method = host.method; // reset method view based on original
+            } else {
+                // CREATE MODE
+                document.getElementById('header-page-title').innerText = "Konfigurasi Hosting";
+                titleEl.innerText = "Detail Konfigurasi";
+                document.getElementById('hosting-id').value = '';
+                
+                if (method === 'import') subtitleEl.innerText = "Hubungkan dan deploy dari Git Repository.";
+                else if (method === 'upload') subtitleEl.innerText = "Unggah file proyek statis Anda.";
+                else subtitleEl.innerText = "Buat direktori dan file kosong untuk memulai.";
+            }
+
+            // Render Dynamic Input Fields based on method (fungsional, terhubung ke deploy asli)
+            if (method === 'import') {
+                dynamicInputEl.innerHTML = `
+                    <label class="block text-sm font-medium mb-1.5 text-gray-700">Repository Publik (owner/nama-repo)</label>
+                    <input type="text" id="hosting-import-repo" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-black text-sm" placeholder="contoh: vercel/next.js">
+                    <p class="text-xs text-gray-500 mt-2"><i data-lucide="info" class="w-3 h-3 inline"></i> Kami akan mengambil file <b>index.html</b> dari branch utama repo publik tersebut dan mempublikasikannya.</p>
+                `;
+            } else if (method === 'upload') {
+                dynamicInputEl.innerHTML = `
+                    <label class="block text-sm font-medium mb-1.5 text-gray-700">Upload File (index.html)</label>
+                    <div class="flex items-center justify-center w-full">
+                        <label id="hosting-upload-label" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition-colors">
+                            <div id="hosting-upload-placeholder" class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <i data-lucide="upload-cloud" class="w-6 h-6 text-gray-400 mb-2"></i>
+                                <p class="mb-1 text-sm text-gray-500"><span class="font-semibold text-black">Klik untuk upload</span> atau seret file ke sini</p>
+                                <p class="text-xs text-gray-400">File .html (Max. 1MB)</p>
+                            </div>
+                            <input type="file" id="hosting-file-input" accept=".html,.htm" class="hidden" onchange="handleHostingFileSelect(event)" />
+                        </label>
+                    </div>
+                `;
+            } else if (method === 'new') {
+                dynamicInputEl.innerHTML = `
+                    <label class="block text-sm font-medium mb-1.5 text-gray-700">Template Awal</label>
+                    <select id="hosting-template-select" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-black text-sm">
+                        <option value="html">HTML Dasar (index.html)</option>
+                        <option value="react" disabled>React JS Template (Segera Hadir)</option>
+                        <option value="vue" disabled>Vue JS Template (Segera Hadir)</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-2">Halaman awal akan langsung dibuat dan dipublikasikan secara nyata.</p>
+                `;
+            }
+            uploadedFileContent = null;
+            updateHostingUrlPreview();
+            lucide.createIcons();
+        }
+
+        // Baca file HTML yang diupload user (jadi konten deploy yang sebenarnya)
+        let uploadedFileContent = null;
+        function handleHostingFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedFileContent = e.target.result;
+                const placeholder = document.getElementById('hosting-upload-placeholder');
+                if (placeholder) {
+                    placeholder.innerHTML = `<i data-lucide="file-check-2" class="w-6 h-6 text-green-600 mb-2"></i><p class="text-sm text-black font-medium">${file.name}</p><p class="text-xs text-gray-400">Siap untuk dideploy</p>`;
+                    lucide.createIcons();
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Update live preview URL di form hosting
+        function updateHostingUrlPreview() {
+            const domainInput = document.getElementById('hosting-domain');
+            const preview = document.getElementById('hosting-url-preview');
+            if (!domainInput || !preview) return;
+            const val = domainInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-') || 'nama-web';
+            const base = getDeployBaseUrl().replace(/\/+$/, '');
+            preview.innerText = base + '/sites/' + val + '/';
+        }
+
+        // Handle Submit Hosting (Create/Update)
+        document.getElementById('form-hosting').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('hosting-id').value;
+            const name = document.getElementById('hosting-name').value;
+            const method = document.getElementById('hosting-method').value;
+            const slugRaw = document.getElementById('hosting-domain').value;
+            const slug = slugRaw.replace(/\s+/g, '-').toLowerCase().replace(/[^a-z0-9-]/g, '');
+            const liveUrl = getDeployBaseUrl().replace(/\/+$/, '') + '/sites/' + slug + '/';
+            
+            let sourceText = "";
+            if (method === 'import') sourceText = "GitHub (Manual Import)";
+            else if (method === 'upload') sourceText = "Upload (Manual)";
+            else sourceText = "Template (Baru)";
+
+            if (id) {
+                // Update
+                const index = hostingData.findIndex(h => h.id == id);
+                if(index !== -1) {
+                    hostingData[index].name = name;
+                    hostingData[index].slug = slug;
+                    hostingData[index].url = '';
+                    hostingData[index].status = "Building";
+                }
+            } else {
+                // Create
+                hostingData.push({
+                    id: Date.now(),
+                    name: name,
+                    slug: slug,
+                    url: '',
+                    source: sourceText,
+                    status: "Building",
+                    method: method
+                });
+            }
+
+            goToHostingList();
+        });
+
+        // Delete Hosting
+        function deleteHosting(id) {
+            if(confirm("Apakah Anda yakin ingin menghapus layanan hosting ini?")) {
+                hostingData = hostingData.filter(h => h.id !== id);
+                renderHosting();
+            }
+        }
+
+        // Fungsi bantuan untuk menyembunyikan semua halaman utama (Content Container pages)
+        function hideAllPages() {
+            const pages = [
+                'page-home', 'page-dynamic',
+                'page-hosting-list', 'page-hosting-create', 'page-hosting-form',
+                'page-project-detail',
+                'page-cloud', 'page-storage', 'page-dns',
+                'page-workers', 'page-security', 'page-tunnel', 'page-imageopt',
+                'page-settings-general', 'page-integrations',
+                'page-tos', 'page-privacy', 'page-feedback', 'page-billing', 'page-profile'
+            ];
+            pages.forEach(page => {
+                const el = document.getElementById(page);
+                if(el) el.classList.add('page-hidden');
+            });
+        }
+
+        // --- SIDEBAR & NAVIGATION LOGIC ---
+
+        const sidebarPanel = document.getElementById('sidebar-panel');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        function toggleSidebar() {
+            const isClosed = sidebarPanel.classList.contains('-translate-x-full');
+            if (isClosed) {
+                sidebarPanel.classList.remove('-translate-x-full');
+                sidebarOverlay.classList.remove('hidden');
+                setTimeout(() => sidebarOverlay.classList.remove('opacity-0'), 10);
+            } else {
+                closeSidebar();
+            }
+        }
+
+        function closeSidebar() {
+            sidebarPanel.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('opacity-0');
+            setTimeout(() => sidebarOverlay.classList.add('hidden'), 300);
+        }
+
+        function toggleDropdown(menuId, iconId) {
+            const menu = document.getElementById(menuId);
+            const icon = document.getElementById(iconId);
+            if (menu.classList.contains('open')) {
+                menu.classList.remove('open');
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                menu.classList.add('open');
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        function navigateApp(pageName, iconName) {
+            const headerTitle = document.getElementById('header-page-title');
+            headerTitle.innerText = pageName;
+            
+            hideAllPages(); // Sembunyikan semua konten terlebih dahulu
+            setHeaderMenuMode('menu'); // Kembalikan header ke mode menu
+            
+            const pageMap = {
+                'Beranda': () => { document.getElementById('page-home').classList.remove('page-hidden'); renderProjects(); },
+                'Hosting': () => { document.getElementById('page-hosting-list').classList.remove('page-hidden'); renderHosting(); },
+                'Cloud (Database NoSQL)': () => { document.getElementById('page-cloud').classList.remove('page-hidden'); renderCollections(); },
+                'Cloud Storage': () => { document.getElementById('page-storage').classList.remove('page-hidden'); renderStorageFiles(); },
+                'DNS Management': () => { document.getElementById('page-dns').classList.remove('page-hidden'); renderDns(); },
+                'Workers': () => document.getElementById('page-workers').classList.remove('page-hidden'),
+                'Keamanan & WAF': () => document.getElementById('page-security').classList.remove('page-hidden'),
+                'Tunnel': () => document.getElementById('page-tunnel').classList.remove('page-hidden'),
+                'Image Optimization': () => document.getElementById('page-imageopt').classList.remove('page-hidden'),
+                'Umum': () => document.getElementById('page-settings-general').classList.remove('page-hidden'),
+                'Integrasi': () => document.getElementById('page-integrations').classList.remove('page-hidden'),
+                'Terms of Service': () => document.getElementById('page-tos').classList.remove('page-hidden'),
+                'Privacy Policy': () => document.getElementById('page-privacy').classList.remove('page-hidden'),
+                'Feedback': () => document.getElementById('page-feedback').classList.remove('page-hidden'),
+                'Billing': () => document.getElementById('page-billing').classList.remove('page-hidden'),
+                'Profile': () => document.getElementById('page-profile').classList.remove('page-hidden'),
+            };
+            if (pageMap[pageName]) {
+                pageMap[pageName]();
+            } else {
+                const pageDynamic = document.getElementById('page-dynamic');
+                const dynamicTitle = document.getElementById('dynamic-title');
+                const dynamicIconContainer = document.getElementById('dynamic-icon');
+                pageDynamic.classList.remove('page-hidden');
+                dynamicTitle.innerText = pageName;
+                dynamicIconContainer.innerHTML = `<i data-lucide="${iconName}" class="w-16 h-16"></i>`;
+                lucide.createIcons();
+            }
+
+            if (window.innerWidth < 1024) closeSidebar();
+        }
+
+
+        // ============================================
+        // PROJECT DETAIL
+        // ============================================
+        function goToProjectDetail(id) {
+            hideAllPages();
+            setHeaderMenuMode('back', () => navigateApp('Beranda', 'Home'));
+            document.getElementById('page-project-detail').classList.remove('page-hidden');
+            renderProjectDetail(id);
+            document.getElementById('header-page-title').innerText = 'Detail Project';
+            if (window.innerWidth < 1024) closeSidebar();
+        }
+
+        function renderProjectDetail(id) {
+            const proj = projects.find(p => p.id == id);
+            if (!proj) return;
+            const base = getDeployBaseUrl().replace(/\/+$/, '');
+            const projUrl = base + '/projects/' + (proj.slug || '');
+            document.getElementById('proj-detail-name').innerText = proj.name;
+            const urlEl = document.getElementById('proj-detail-url');
+            urlEl.href = projUrl;
+            urlEl.innerText = projUrl;
+            document.getElementById('proj-detail-edit-btn').onclick = () => openProjectModal(proj.id);
+        }
+
+        // ============================================
+        // TOAST
+        // ============================================
+        function showToast(msg) {
+            let t = document.getElementById('global-toast');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'global-toast';
+                t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:999;padding:10px 20px;border-radius:999px;font-size:14px;font-weight:500;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;box-shadow:0 2px 8px rgba(0,0,0,.08);transition:opacity .3s;';
+                document.body.appendChild(t);
+            }
+            t.innerText = msg;
+            t.style.opacity = '1';
+            clearTimeout(t._timer);
+            t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2800);
+        }
+
+        // ============================================
+        // FEEDBACK
+        // ============================================
+        let feedbackRating = 0;
+        function setFeedbackRating(n) {
+            feedbackRating = n;
+            document.querySelectorAll('.star-btn').forEach((btn, i) => {
+                btn.classList.toggle('text-yellow-400', i < n);
+                btn.classList.toggle('text-gray-300', i >= n);
+            });
+        }
+        function submitFeedback() {
+            if (!feedbackRating) { alert('Pilih rating terlebih dahulu.'); return; }
+            document.getElementById('feedback-form-wrap').classList.add('page-hidden');
+            document.getElementById('feedback-success').classList.remove('page-hidden');
+        }
+
+        // ============================================
+        // BILLING / COMING SOON notify
+        // ============================================
+        function notifyUpgrade(plan) { showToast('Permintaan upgrade ke ' + plan + ' diterima!'); }
+        function notifyMe(feature)   { showToast('Kami akan menghubungi Anda saat ' + feature + ' tersedia.'); }
+
+        // ============================================
+        // INTEGRATION toggle
+        // ============================================
+        function toggleIntegration(name, btn) {
+            const on = btn.innerText.trim() === 'Putuskan';
+            btn.innerText = on ? 'Hubungkan' : 'Putuskan';
+            const dot   = document.getElementById('int-dot-'   + name);
+            const label = document.getElementById('int-label-' + name);
+            if (dot)   dot.className   = on ? 'w-2 h-2 rounded-full bg-gray-400' : 'w-2 h-2 rounded-full bg-green-500';
+            if (label) label.innerText = on ? 'Tidak Terhubung' : 'Terhubung';
+            showToast(on ? name + ' diputus.' : name + ' berhasil dihubungkan!');
+        }
+
+        // ============================================
+        // CLOUD DB
+        // ============================================
+        let collections = [
+            { id: 1, name: 'users',    docs: 1247, size: '2.4 MB', created: '10 Jun 2026' },
+            { id: 2, name: 'products', docs:  893, size: '1.1 MB', created: '12 Jun 2026' },
+        ];
+        function renderCollections() {
+            const tbody = document.getElementById('collections-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = collections.map(col => `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 font-medium text-black">${col.name}</td>
+                    <td class="px-6 py-4 text-gray-600">${col.docs.toLocaleString('id-ID')}</td>
+                    <td class="px-6 py-4 text-gray-600">${col.size}</td>
+                    <td class="px-6 py-4 text-gray-500 text-sm">${col.created}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="deleteCollection(${col.id})" class="p-1.5 text-gray-400 hover:text-red-600 rounded-full transition-colors">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                </tr>`).join('');
+            lucide.createIcons();
+        }
+        function deleteCollection(id) {
+            if (confirm('Hapus collection ini?')) {
+                collections = collections.filter(c => c.id !== id);
+                renderCollections();
+            }
+        }
+        function addCollection() {
+            const name = prompt('Nama collection baru:');
+            if (!name || !name.trim()) return;
+            collections.push({ id: Date.now(), name: name.trim().toLowerCase().replace(/\s+/g, '_'), docs: 0, size: '0 KB', created: new Date().toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric'}) });
+            renderCollections();
+        }
+
+        // ============================================
+        // CLOUD STORAGE
+        // ============================================
+        let storageFiles = [
+            { id: 1, name: 'logo.png',   type: 'image/png',       size: '245 KB',  uploaded: '5 Jul 2026' },
+            { id: 2, name: 'backup.zip', type: 'application/zip', size: '1.2 MB',  uploaded: '7 Jul 2026' },
+            { id: 3, name: 'docs.pdf',   type: 'application/pdf', size: '89 KB',   uploaded: '9 Jul 2026' },
+        ];
+        function renderStorageFiles() {
+            const tbody = document.getElementById('storage-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = storageFiles.map(file => {
+                const icon = file.type.startsWith('image') ? 'image' : file.type.includes('zip') ? 'archive' : 'file-text';
+                return `<tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4"><div class="flex items-center gap-2"><i data-lucide="${icon}" class="w-4 h-4 text-gray-400"></i><span class="font-medium text-black">${file.name}</span></div></td>
+                    <td class="px-6 py-4 text-gray-500 text-xs">${file.type}</td>
+                    <td class="px-6 py-4 text-gray-600">${file.size}</td>
+                    <td class="px-6 py-4 text-gray-500 text-sm">${file.uploaded}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="deleteStorageFile(${file.id})" class="p-1.5 text-gray-400 hover:text-red-600 rounded-full transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+            lucide.createIcons();
+        }
+        function deleteStorageFile(id) {
+            if (confirm('Hapus file ini?')) { storageFiles = storageFiles.filter(f => f.id !== id); renderStorageFiles(); }
+        }
+
+        // ============================================
+        // DNS
+        // ============================================
+        let dnsRecords = [
+            { id: 1, type: 'A',     name: '@',   value: '76.76.21.21',         ttl: '3600' },
+            { id: 2, type: 'CNAME', name: 'www', value: 'muzawwied.github.io', ttl: '300'  },
+            { id: 3, type: 'MX',    name: '@',   value: 'mail.vylonium.io',    ttl: '3600' },
+        ];
+        function renderDns() {
+            const tbody = document.getElementById('dns-tbody');
+            if (!tbody) return;
+            const colors = { A: 'text-blue-700 bg-blue-50 border-blue-200', CNAME: 'text-purple-700 bg-purple-50 border-purple-200', MX: 'text-orange-700 bg-orange-50 border-orange-200' };
+            tbody.innerHTML = dnsRecords.map(r => `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4"><span class="px-2 py-0.5 rounded text-xs font-bold border ${colors[r.type] || 'text-gray-700 bg-gray-50 border-gray-200'}">${r.type}</span></td>
+                    <td class="px-6 py-4 font-mono text-sm text-black">${r.name}</td>
+                    <td class="px-6 py-4 font-mono text-sm text-gray-600">${r.value}</td>
+                    <td class="px-6 py-4 text-gray-500 text-sm">${r.ttl}s</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="deleteDnsRecord(${r.id})" class="p-1.5 text-gray-400 hover:text-red-600 rounded-full transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>`).join('');
+            lucide.createIcons();
+        }
+        function deleteDnsRecord(id) {
+            if (confirm('Hapus record DNS ini?')) { dnsRecords = dnsRecords.filter(r => r.id !== id); renderDns(); }
+        }
+
+        // --- HELPER FUNCTIONS ---
+
+        // Fungsi untuk toggle password visibility
+        function togglePasswordVisibility(buttonElement, inputId) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                buttonElement.innerHTML = '<i data-lucide="eye-off" class="w-4 h-4"></i>';
+            } else {
+                input.type = 'password';
+                buttonElement.innerHTML = '<i data-lucide="eye" class="w-4 h-4"></i>';
+            }
+            lucide.createIcons();
+        }
+
+        // Fungsi untuk toggle dropdown pintar (adaptive positioning) di tabel CRUD
+        function toggleTableDropdown(event, id, btnElement) {
+            event.stopPropagation();
+            const dropdown = document.getElementById(`dropdown-${id}`);
+            const isCurrentlyHidden = dropdown.classList.contains('hidden');
+            
+            closeAllTableDropdowns();
+            
+            if (isCurrentlyHidden) {
+                // Tampilkan sebentar secara tersembunyi (visibility hidden) untuk mendapatkan ukurannya
+                dropdown.style.visibility = 'hidden';
+                dropdown.classList.remove('hidden');
+                
+                // Kalkulasi ruang layar
+                const btnRect = btnElement.getBoundingClientRect();
+                const dropRect = dropdown.getBoundingClientRect();
+                const viewportHeight = window.innerHeight;
+                
+                // Ubah menjadi fixed agar tidak terpotong (overflow-hidden) dari kontainer tabel
+                dropdown.style.position = 'fixed';
+                dropdown.style.zIndex = '100';
+                
+                // Set posisi mendatar (x): ratakan ujung kanan dropdown dengan ujung kanan tombol
+                dropdown.style.left = `${btnRect.right - dropRect.width}px`;
+                
+                // Cek ruang vertikal (y)
+                const spaceBelow = viewportHeight - btnRect.bottom;
+                
+                // Jika ruang di bawah sempit (< tinggi dropdown) dan ruang di atas luas, buka ke atas
+                if (spaceBelow < (dropRect.height + 10) && btnRect.top > (dropRect.height + 10)) {
+                    dropdown.style.top = `${btnRect.top - dropRect.height - 5}px`; // Buka Ke Atas
+                } else {
+                    dropdown.style.top = `${btnRect.bottom + 5}px`; // Buka Ke Bawah (Default)
+                }
+                
+                // Kembalikan visibilitas aslinya agar dapat dilihat
+                dropdown.style.visibility = 'visible';
+            }
+        }
+
+        // Menutup semua dropdown tabel yang terbuka
+        function closeAllTableDropdowns() {
+            document.querySelectorAll('.table-dropdown').forEach(el => {
+                el.classList.add('hidden');
+            });
+        }
+
+        // Event listener global untuk menutup dropdown saat klik area mana pun di luar dropdown
+        window.addEventListener('click', function() {
+            closeAllTableDropdowns();
+        });
+        
+        // Menutup dropdown saat scroll terjadi agar dropdown "fixed" tidak tertinggal melayang di tempat asalnya
+        document.getElementById('content-container').addEventListener('scroll', function() {
+            closeAllTableDropdowns();
+        });
+
+    </script>
+</body>
+</html>
